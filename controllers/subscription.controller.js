@@ -1,5 +1,6 @@
-import Subscription from "../models/Subscription.model.js";
+import Subscription from "../models/subscription.model.js";
 import { workflowClient } from "../config/upstash.js";
+import { SERVER_URL } from "../config/env.js";
 
 export const createSubscription=async(req,res,next)=>{
   try{
@@ -7,13 +8,29 @@ export const createSubscription=async(req,res,next)=>{
       ...req.body,
       user:req.user._id,
     });
-    await workflowClient.trigger({
-      url:`${SERVER_URL}`
-    })
+    
+    // Configure QStash trigger
+    const response = await workflowClient.trigger({
+      url: `${SERVER_URL}/api/v1/workflow/subscription/reminder`,
+      body: {
+        subscriptionId: subscription.id
+      },
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      retries: 3
+    });
+    
+    console.log('QStash Response:', response);
+    const workflowId = response.messageId || response.workflowId; // try both possible fields
 
     res.status(201).json({
       success:true,
-      data:subscription,
+      data: {
+        subscription,
+        workflowId,
+        qstashResponse: response // include full response for debugging
+      }
     });
   }catch(e){
     next(e);
