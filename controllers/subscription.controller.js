@@ -1,6 +1,6 @@
 import Subscription from "../models/subscription.model.js";
 import { workflowClient } from "../config/upstash.js";
-import { SERVER_URL } from "../config/env.js";
+//import { SERVER_URL } from "../config/env.js";
 
 export const createSubscription=async(req,res,next)=>{
   try{
@@ -10,19 +10,25 @@ export const createSubscription=async(req,res,next)=>{
     });
     
     // Configure QStash trigger
+    console.log('Creating workflow for subscription:', subscription.id);
+    const webhookUrl = `${process.env.SERVER_URL}/api/v1/workflows/subscription/reminder`;
+    console.log('Using webhook URL:', webhookUrl);
+    
     const response = await workflowClient.trigger({
-      url: `${SERVER_URL}/api/v1/workflow/subscription/reminder`,
+      url: webhookUrl,
       body: {
-        subscriptionId: subscription.id
+        subscriptionId: subscription.id,
+        userId: req.user._id
       },
       headers: {
         'Content-Type': 'application/json'
       },
-      retries: 3
+      retries: 3,
+      cron: "0 12 * * *"  // Run at 12:00 PM every day
     });
     
-    console.log('QStash Response:', response);
-    const workflowId = response.messageId || response.workflowId; // try both possible fields
+    console.log('QStash Response:', JSON.stringify(response, null, 2));
+    const workflowId = response.scheduleId || response.messageId || response.id;
 
     res.status(201).json({
       success:true,

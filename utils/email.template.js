@@ -1,12 +1,12 @@
-export const generateEmailTemplate = ({
+//import dayjs from 'dayjs';
+
+const generateEmailTemplate = ({
   userName,
   subscriptionName,
   renewalDate,
   planName,
   price,
   paymentMethod,
-  accountSettingsLink,
-  supportLink,
   daysLeft,
 }) => `
 <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 0; background-color: #f4f7fa;">
@@ -40,9 +40,9 @@ export const generateEmailTemplate = ({
                     </tr>
                 </table>
                 
-                <p style="font-size: 16px; margin-bottom: 25px;">If you'd like to make changes or cancel your subscription, please visit your <a href="${accountSettingsLink}" style="color: #4a90e2; text-decoration: none;">account settings</a> before the renewal date.</p>
+                <p style="font-size: 16px; margin-bottom: 25px;">If you'd like to make changes or cancel your subscription, please visit your <a href="http://localhost:5500/account" style="color: #4a90e2; text-decoration: none;">account settings</a> before the renewal date.</p>
                 
-                <p style="font-size: 16px; margin-top: 30px;">Need help? <a href="${supportLink}" style="color: #4a90e2; text-decoration: none;">Contact our support team</a> anytime.</p>
+                <p style="font-size: 16px; margin-top: 30px;">Need help? <a href="http://localhost:5500/support" style="color: #4a90e2; text-decoration: none;">Contact our support team</a> anytime.</p>
                 
                 <p style="font-size: 16px; margin-top: 30px;">
                     Best regards,<br>
@@ -67,6 +67,12 @@ export const generateEmailTemplate = ({
 `;
 
 export const emailTemplates = [
+  {
+    label: "30 days before reminder",
+    generateSubject: (data) =>
+      `🔔 Early Reminder: Your ${data.subscriptionName} Subscription Renews in 30 Days`,
+    generateBody: (data) => generateEmailTemplate({ ...data, daysLeft: 30 }),
+  },
   {
     label: "7 days before reminder",
     generateSubject: (data) =>

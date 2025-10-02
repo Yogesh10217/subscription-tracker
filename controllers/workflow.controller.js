@@ -1,81 +1,115 @@
-// send-reminders.workflow.js
-import { createRequire } from 'module';
 import dayjs from 'dayjs';
 import { sendReminderEmail } from '../utils/send-email.js';
 import Subscription from '../models/subscription.model.js';
 
-const require = createRequire(import.meta.url);
-const { serve } = require('@upstash/qstash/nextjs');
+export const sendReminders = async (req, res) => {
+  try {
+    console.log('Received webhook payload:', req.body);
+    
+    // Handle QStash webhook format
+    let subscriptionId;
+    if (Array.isArray(req.body) && req.body[0]?.body) {
+      // Decode base64 body
+      const decodedBody = Buffer.from(req.body[0].body, 'base64').toString();
+      console.log('Decoded webhook body:', decodedBody);
+      const payload = JSON.parse(decodedBody);
+      subscriptionId = payload.subscriptionId;
+    } else {
+      subscriptionId = req.body.subscriptionId;
+    }
 
-const reminderDays = [7, 5, 2, 1]; // Days before renewal to send reminders
+    if (!subscriptionId) {
+      console.error('No subscriptionId in webhook payload');
+      return res.status(400).json({ error: 'Missing subscriptionId' });
+    }
 
-export const sendReminders = serve(async (context) => {
-  const { subscriptionId } = context.requestPayload;
+    console.log('Fetching subscription:', subscriptionId);
+    const subscription = await Subscription.findById(subscriptionId).populate('user', 'email name');
+    
+    if (!subscription) {
+      console.log(`Subscription not found: ${subscriptionId}`);
+      return res.status(404).json({ error: 'Subscription not found' });
+    }
+    
+    console.log('Found subscription:', {
+      id: subscription._id,
+      status: subscription.status,
+      renewalDate: subscription.renewalDate
+    });
 
-  const subscription = await fetchSubscription(context, subscriptionId);
-  if (!subscription || subscription.status !== 'active') {
-    console.log(`Subscription is invalid or not active: ${subscriptionId}`);
-    return;
-  }
+    if (subscription.status !== 'Active') {  // Note the capital 'A'
+      console.log(`Subscription is not active: ${subscriptionId}, status: ${subscription.status}`);
+      return res.status(400).json({ error: 'Inactive subscription' });
+    }
 
-  if (!subscription.user?.email) {
-    console.log(`No user email found for subscription: ${subscriptionId}`);
-    return;
-  }
+    if (!subscription.user?.email) {
+      console.log(`No user email found for subscription: ${subscriptionId}`);
+      return res.status(400).json({ error: 'No user email found' });
+    }
 
-  const renewalDate = dayjs(subscription.renewalDate);
-  if (renewalDate.isBefore(dayjs())) {
-    console.log(`Renewal date has passed for subscription ${subscriptionId}. Stopping workflow`);
-    return;
-  }
+    const renewalDate = dayjs(subscription.renewalDate);
+    console.log('Renewal date:', renewalDate.format('YYYY-MM-DD'));
+    
+    if (renewalDate.isBefore(dayjs())) {
+      console.log(`Renewal date has passed for subscription ${subscriptionId}`);
+      return res.status(200).json({ message: 'Renewal date passed' });
+    }
 
-  for (const daysBefore of reminderDays) {
-    const label = `${daysBefore} days before reminder`;
-    const reminderDate = renewalDate.subtract(daysBefore, 'day');
-    const today = dayjs();
+    // Calculate days until renewal
+    const daysUntilRenewal = renewalDate.diff(dayjs(), 'day');
+    console.log('Days until renewal:', daysUntilRenewal);
 
-    console.log(
-      `[${label}] Reminder Date: ${reminderDate.format('YYYY-MM-DD')} | Today: ${today.format('YYYY-MM-DD')}`
+    // Define reminder thresholds
+    const reminderThresholds = [30, 7, 5, 2, 1];
+    
+    // Find the appropriate reminder day
+    let reminderDay = reminderThresholds.find(days => daysUntilRenewal >= days);
+    if (!reminderDay) {
+      console.log('No appropriate reminder threshold found for days:', daysUntilRenewal);
+      return res.status(200).json({ message: 'No reminder needed' });
+    }
+
+    // Set the reminder type
+    const reminderType = `${reminderDay} days before reminder`;
+    console.log('Using reminder type:', reminderType);
+
+    // Add daysUntilRenewal to the subscription object for the email template
+    subscription.daysLeft = daysUntilRenewal;
+
+    console.log('About to send reminder email with:', {
+      email: subscription.user.email,
+      type: reminderType,
+      subscriptionDetails: {
+        name: subscription.name,
+        renewalDate: subscription.renewalDate,
+        daysLeft: subscription.daysLeft
+      }
+    });
+
+    await sendReminderEmail(
+      subscription.user.email,
+      reminderType,
+      subscription
     );
-
-    if (reminderDate.isAfter(today)) {
-      await sleepUntilReminder(context, label, reminderDate);
+    
+    console.log('Reminder email sent successfully');
+    return res.status(200).json({ 
+      success: true,
+      message: 'Reminder email sent successfully',
+      details: {
+        email: subscription.user.email,
+        reminderType,
+        subscriptionId: subscription._id
+      }
+    });
+  } catch (error) {
+    console.error('Error processing reminder:', error);
+    if (error.message.includes('email')) {
+      return res.status(500).json({ 
+        error: 'Failed to send reminder email',
+        details: error.message
+      });
     }
-
-    if (reminderDate.isSame(today, 'day') || reminderDate.isBefore(today)) {
-      await triggerReminder(context, label, subscription);
-    }
+    return res.status(500).json({ error: 'Internal server error' });
   }
-});
-
-// Fetch subscription with populated user
-const fetchSubscription = async (context, subscriptionId) => {
-  return context.run('get subscription', async () => {
-    return Subscription.findById(subscriptionId).populate('user', 'email name');
-  });
 };
-
-// Sleep until the reminder date
-const sleepUntilReminder = async (context, label, reminderDate) => {
-  console.log(`Sleeping until ${label} (${reminderDate.format('YYYY-MM-DD')})`);
-  await context.sleepUntil(label, reminderDate.toDate());
-};
-
-// Trigger reminder and send email
-const triggerReminder = async (context, label, subscription) => {
-  return context.run(label, async () => {
-    console.log(`Triggering ${label} reminder for ${subscription.user.email}`);
-    try {
-      await sendReminderEmail(
-        subscription.user.email,  // to
-        label,                   // type
-        subscription            // subscription data
-      );
-      console.log('Email sent successfully');
-    } catch (error) {
-      console.error('Error sending email:', error.message);
-      throw error,
-      subscription 
-    }
-  });
-}
