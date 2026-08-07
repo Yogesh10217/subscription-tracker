@@ -1,0 +1,35 @@
+name: Docker Build & Smoke Verification
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  docker-build-and-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU for Multi-Arch Buildx
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Multi-Stage Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: false
+          tags: subpulse:latest
+
+      - name: Local Docker Compose Smoke Test
+        run: |
+          docker compose --profile production up -d
+          sleep 10
+          node scripts/smoke-test.js
+          docker compose --profile production down

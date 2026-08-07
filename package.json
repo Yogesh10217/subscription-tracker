@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
+    "production": "NODE_ENV=production node app.js",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write \"src/**/*.js\" \"tests/**/*.js\"",
@@ -15,7 +16,15 @@
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
     "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --runInBand",
     "verify": "npm run check && npm run test",
-    "docs": "prettier --check \"src/docs/**/*.md\""
+    "docs": "prettier --check \"src/docs/**/*.md\"",
+    "smoke": "node scripts/smoke-test.js",
+    "docker:build": "docker build -t subpulse:latest .",
+    "docker:up": "docker compose --profile production up -d",
+    "docker:dev": "docker compose --profile development up -d",
+    "docker:down": "docker compose --profile production down",
+    "docker:logs": "docker compose --profile production logs -f",
+    "docker:shell": "docker exec -it subpulse-app-prod /bin/sh",
+    "docker:clean": "docker compose down -v --remove-orphans && docker system prune -f"
   },
   "imports": {
     "#config/*": "./src/config/*",

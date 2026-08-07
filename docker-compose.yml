@@ -1,0 +1,123 @@
+version: '3.8'
+
+services:
+  # ==========================================
+  # MongoDB Database Service
+  # ==========================================
+  mongodb:
+    image: mongo:7.0-alpine
+    container_name: subpulse-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: adminpassword
+      MONGO_INITDB_DATABASE: subscription-tracker
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - subpulse-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ==========================================
+  # SubPulse Application - Production Profile
+  # ==========================================
+  app:
+    profiles: ["production"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    container_name: subpulse-app-prod
+    restart: unless-stopped
+    ports:
+      - "5500:5500"
+    environment:
+      NODE_ENV: production
+      PORT: 5500
+      DB_URI: mongodb://admin:adminpassword@mongodb:27017/subscription-tracker?authSource=admin
+      JWT_SECRET: super-secret-production-jwt-key-subpulse-2026
+      JWT_EXPIRES_IN: 7d
+      LOG_LEVEL: info
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.10'
+          memory: 128M
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - subpulse-network
+
+  # ==========================================
+  # SubPulse Application - Development Profile
+  # ==========================================
+  app-dev:
+    profiles: ["development"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: subpulse-app-dev
+    command: npm run dev
+    ports:
+      - "5500:5500"
+    environment:
+      NODE_ENV: development
+      PORT: 5500
+      DB_URI: mongodb://admin:adminpassword@mongodb:27017/subscription-tracker?authSource=admin
+      JWT_SECRET: dev-jwt-secret-key-12345
+      JWT_EXPIRES_IN: 1d
+      LOG_LEVEL: debug
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - subpulse-network
+
+  # ==========================================
+  # Mongo Express Web GUI - Development Profile
+  # ==========================================
+  mongo-express:
+    profiles: ["development"]
+    image: mongo-express:1.0-alpine
+    container_name: subpulse-mongo-express
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: adminpassword
+      ME_CONFIG_MONGODB_URL: mongodb://admin:adminpassword@mongodb:27017/
+      ME_CONFIG_BASICAUTH: "false"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - subpulse-network
+
+networks:
+  subpulse-network:
+    driver: bridge
+    name: subpulse-network
+
+volumes:
+  mongo-data:
+    name: subpulse-mongo-data
