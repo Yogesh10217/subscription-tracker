@@ -15,14 +15,14 @@ export const connectToDatabase = async (maxRetries = 3, retryDelayMs = 2000) => 
     try {
       attempts++;
       logger.info(`Connecting to MongoDB (Attempt ${attempts}/${maxRetries})...`);
-      
+
       const conn = await mongoose.connect(DB_URI, {
         serverSelectionTimeoutMS: 5000
       });
 
       isConnected = true;
       logger.info(`✅ Connected to MongoDB in ${NODE_ENV} mode [Host: ${conn.connection.host}]`);
-      
+
       mongoose.connection.on('error', (err) => {
         logger.error('MongoDB connection runtime error', { error: err.message });
         isConnected = false;
@@ -35,7 +35,9 @@ export const connectToDatabase = async (maxRetries = 3, retryDelayMs = 2000) => 
 
       return conn;
     } catch (error) {
-      logger.warn(`MongoDB connection failed (Attempt ${attempts}/${maxRetries}): ${error.message}`);
+      logger.warn(
+        `MongoDB connection failed (Attempt ${attempts}/${maxRetries}): ${error.message}`
+      );
       if (attempts >= maxRetries) {
         logger.error('Max database connection retries reached. Continuing in offline/demo mode...');
         return null;

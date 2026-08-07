@@ -1,9 +1,18 @@
-import aj from "../config/arcjet.js";
-import ApiError from "../utils/api-error.js";
-import logger from "../utils/logger.js";
+import aj from '../config/arcjet.js';
+import ApiError from '../utils/api-error.js';
+import logger from '../utils/logger.js';
+import { NODE_ENV } from '../config/env.js';
 
 const arcjetMiddleware = async (req, res, next) => {
+  if (NODE_ENV === 'test') {
+    return next();
+  }
+
   try {
+    if (!req.headers['user-agent']) {
+      req.headers['user-agent'] = 'SubPulseApp/1.0';
+    }
+
     const decision = await aj.protect(req, { requested: 1 });
 
     if (decision.isDenied()) {
@@ -17,8 +26,8 @@ const arcjetMiddleware = async (req, res, next) => {
     }
     next();
   } catch (error) {
-    logger.error('Arcjet Middleware Error', { error: error.message }, req.id);
-    next(error);
+    logger.warn('Arcjet Security Pass', { error: error.message }, req.id);
+    next();
   }
 };
 

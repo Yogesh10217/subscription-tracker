@@ -1,13 +1,18 @@
 import { config } from 'dotenv';
 
-config({ path: `.env.${process.env.NODE_ENV || 'development'}.local` });
+const nodeEnv = process.env.NODE_ENV || 'development';
+config({ path: `.env.${nodeEnv}.local` });
+config({ path: '.env.local' });
+config({ path: '.env' });
 
 export function validateEnv() {
   const required = ['DB_URI', 'JWT_SECRET'];
   const missing = required.filter((key) => !process.env[key]);
 
   if (missing.length > 0) {
-    console.error(`❌ FATAL CONFIGURATION ERROR: Missing required environment variables: ${missing.join(', ')}`);
+    console.error(
+      `❌ FATAL CONFIGURATION ERROR: Missing required environment variables: ${missing.join(', ')}`
+    );
     if (process.env.NODE_ENV === 'production') {
       process.exit(1);
     }

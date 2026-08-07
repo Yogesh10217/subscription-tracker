@@ -2,7 +2,7 @@ import ApiError from '../utils/api-error.js';
 import logger from '../utils/logger.js';
 import { HttpStatus } from '../constants/http-status.js';
 
-export const errorMiddleware = (err, req, res, next) => {
+export const errorMiddleware = (err, req, res, _next) => {
   let error = err;
 
   // Handle Mongoose bad ObjectId
@@ -17,7 +17,9 @@ export const errorMiddleware = (err, req, res, next) => {
 
   // Handle Mongoose validation error
   if (err.name === 'ValidationError' && err.errors) {
-    const message = Object.values(err.errors).map((val) => val.message).join(', ');
+    const message = Object.values(err.errors)
+      .map((val) => val.message)
+      .join(', ');
     error = ApiError.validation(message);
   }
 
@@ -25,10 +27,14 @@ export const errorMiddleware = (err, req, res, next) => {
   const message = error.message || 'Internal Server Error';
   const errors = error.errors || [];
 
-  logger.error(`[${req.method}] ${req.originalUrl} - ${statusCode} ${message}`, {
-    stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
-    errors
-  }, req.id);
+  logger.error(
+    `[${req.method}] ${req.originalUrl} - ${statusCode} ${message}`,
+    {
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+      errors
+    },
+    req.id
+  );
 
   res.status(statusCode).json({
     success: false,

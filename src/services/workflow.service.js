@@ -44,8 +44,8 @@ export class WorkflowService {
 
     const daysUntilRenewal = renewalDate.diff(dayjs(), 'day');
     const reminderThresholds = [30, 7, 5, 2, 1];
-    
-    let reminderDay = reminderThresholds.find(days => daysUntilRenewal >= days);
+
+    const reminderDay = reminderThresholds.find((days) => daysUntilRenewal >= days);
     if (!reminderDay) {
       logger.info('No appropriate reminder threshold found', { daysUntilRenewal });
       return { message: 'No reminder needed' };
@@ -54,11 +54,7 @@ export class WorkflowService {
     const reminderType = `${reminderDay} days before reminder`;
     subscription.daysLeft = daysUntilRenewal;
 
-    await sendReminderEmail(
-      subscription.user.email,
-      reminderType,
-      subscription
-    );
+    await sendReminderEmail(subscription.user.email, reminderType, subscription);
 
     return {
       message: 'Reminder email sent successfully',

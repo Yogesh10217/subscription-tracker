@@ -8,7 +8,7 @@ export class SubscriptionService {
   async createSubscription(data, userId) {
     const subscription = await subscriptionRepository.create({
       ...data,
-      user: userId,
+      user: userId
     });
 
     let qstashResponse = null;
@@ -17,7 +17,10 @@ export class SubscriptionService {
     try {
       if (workflowClient && SERVER_URL) {
         const webhookUrl = `${SERVER_URL}/api/v1/workflows/subscription/reminder`;
-        logger.info('Triggering QStash workflow for subscription', { subscriptionId: subscription.id, webhookUrl });
+        logger.info('Triggering QStash workflow for subscription', {
+          subscriptionId: subscription.id,
+          webhookUrl
+        });
 
         qstashResponse = await workflowClient.trigger({
           url: webhookUrl,
@@ -29,13 +32,15 @@ export class SubscriptionService {
             'Content-Type': 'application/json'
           },
           retries: 3,
-          cron: "0 12 * * *"
+          cron: '0 12 * * *'
         });
 
         workflowId = qstashResponse?.scheduleId || qstashResponse?.messageId || qstashResponse?.id;
       }
     } catch (workflowErr) {
-      logger.warn('QStash workflow trigger warning (continuing creation)', { error: workflowErr.message });
+      logger.warn('QStash workflow trigger warning (continuing creation)', {
+        error: workflowErr.message
+      });
     }
 
     return {

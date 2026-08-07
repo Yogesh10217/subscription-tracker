@@ -1,15 +1,15 @@
-import express from "express";
-import cookieParser from "cookie-parser";
+import express from 'express';
+import cookieParser from 'cookie-parser';
 
-import requestIdMiddleware from "./middleware/request-id.middleware.js";
-import arcjetMiddleware from "./middleware/arcjet.middleware.js";
-import errorMiddleware from "./middleware/error.middleware.js";
+import requestIdMiddleware from './middleware/request-id.middleware.js';
+import arcjetMiddleware from './middleware/arcjet.middleware.js';
+import errorMiddleware from './middleware/error.middleware.js';
 
-import healthRouter from "./routes/health.routes.js";
-import authRouter from "./routes/auth.routes.js";
-import userRouter from "./routes/user.routes.js";
-import subscriptionRouter from "./routes/subscription.routes.js";
-import workflowRouter from "./routes/workflow.routes.js";
+import healthRouter from './routes/health.routes.js';
+import authRouter from './routes/auth.routes.js';
+import userRouter from './routes/user.routes.js';
+import subscriptionRouter from './routes/subscription.routes.js';
+import workflowRouter from './routes/workflow.routes.js';
 
 const app = express();
 

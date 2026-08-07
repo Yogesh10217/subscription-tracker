@@ -1,10 +1,10 @@
-import { Client as WorkflowClient } from "@upstash/workflow";
-import { QSTASH_URL, QSTASH_TOKEN } from "./env.js";
-import logger from "../utils/logger.js";
+import { Client as WorkflowClient } from '@upstash/workflow';
+import { QSTASH_URL, QSTASH_TOKEN } from './env.js';
+import logger from '../utils/logger.js';
 
 export const workflowClient = new WorkflowClient({
   baseUrl: QSTASH_URL || 'http://127.0.0.1:8090',
-  token: QSTASH_TOKEN || 'development',
+  token: QSTASH_TOKEN || 'development'
 });
 
 logger.info('QStash Configuration Initialized', {

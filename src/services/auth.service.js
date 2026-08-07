@@ -19,13 +19,14 @@ export class AuthService {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
-      const newUser = await userRepository.create({ name, email, password: hashedPassword }, session);
-
-      const token = jwt.sign(
-        { userId: newUser._id, email: newUser.email },
-        JWT_SECRET,
-        { expiresIn: JWT_EXPIRES_IN }
+      const newUser = await userRepository.create(
+        { name, email, password: hashedPassword },
+        session
       );
+
+      const token = jwt.sign({ userId: newUser._id, email: newUser.email }, JWT_SECRET, {
+        expiresIn: JWT_EXPIRES_IN
+      });
 
       await session.commitTransaction();
       session.endSession();
@@ -54,11 +55,7 @@ export class AuthService {
       throw ApiError.unauthorized('Invalid Credentials');
     }
 
-    const token = jwt.sign(
-      { userId: user._id },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
-    );
+    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 
     const userObj = user.toObject();
     delete userObj.password;

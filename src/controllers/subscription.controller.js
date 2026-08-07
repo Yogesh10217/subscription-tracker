@@ -10,7 +10,10 @@ export const createSubscription = asyncHandler(async (req, res) => {
 
 export const getUserSubscriptions = asyncHandler(async (req, res) => {
   const requestingUserId = req.user ? req.user._id : null;
-  const subscriptions = await subscriptionService.getUserSubscriptions(req.params.id, requestingUserId);
+  const subscriptions = await subscriptionService.getUserSubscriptions(
+    req.params.id,
+    requestingUserId
+  );
   return ApiResponse.success(res, subscriptions);
 });
 

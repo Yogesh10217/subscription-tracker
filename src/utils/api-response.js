@@ -16,7 +16,12 @@ export class ApiResponse {
     return res.status(HttpStatus.CREATED).json(new ApiResponse(HttpStatus.CREATED, data, message));
   }
 
-  static error(res, message = 'An error occurred', statusCode = HttpStatus.BAD_REQUEST, errors = []) {
+  static error(
+    res,
+    message = 'An error occurred',
+    statusCode = HttpStatus.BAD_REQUEST,
+    errors = []
+  ) {
     return res.status(statusCode).json({
       success: false,
       statusCode,

@@ -17,11 +17,17 @@ export const validateCreateSubscription = (req, res, next) => {
   }
 
   if (!category || !ALLOWED_CATEGORIES.includes(category)) {
-    errors.push({ field: 'category', message: `Category must be one of: ${ALLOWED_CATEGORIES.join(', ')}` });
+    errors.push({
+      field: 'category',
+      message: `Category must be one of: ${ALLOWED_CATEGORIES.join(', ')}`
+    });
   }
 
   if (frequency && !ALLOWED_FREQUENCIES.includes(frequency)) {
-    errors.push({ field: 'frequency', message: `Frequency must be one of: ${ALLOWED_FREQUENCIES.join(', ')}` });
+    errors.push({
+      field: 'frequency',
+      message: `Frequency must be one of: ${ALLOWED_FREQUENCIES.join(', ')}`
+    });
   }
 
   if (!paymentMethod || typeof paymentMethod !== 'string') {
