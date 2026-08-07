@@ -7,7 +7,7 @@ import ApiError from './api-error.js';
 export const sendReminderEmail = async (to, type, subscription) => {
   logger.info('Attempting to send email', { to, type });
 
-  if (!to || !type || !subscription) {
+  if (!to || (!type && !subscription)) {
     logger.error('Missing required email parameters', {
       to,
       type,
@@ -17,23 +17,26 @@ export const sendReminderEmail = async (to, type, subscription) => {
   }
 
   try {
-    const template = emailTemplates.find((t) => t.label === type);
-
-    if (!template) {
-      throw ApiError.badRequest('Invalid email type');
-    }
-
-    const mailInfo = {
-      userName: subscription.user?.name || 'Customer',
-      subscriptionName: subscription.name,
-      renewalDate: dayjs(subscription.renewalDate).format('MMM D, YYYY'),
-      planName: subscription.planName || subscription.name,
-      price: `${subscription.currency} ${subscription.price} per ${subscription.frequency}`,
-      paymentMethod: subscription.paymentMethod
+    const template = emailTemplates.find((t) => t.label === type) || {
+      generateSubject: (info) => info.subject || 'SubPulse Notification',
+      generateBody: (info) => info.message || 'Notification from SubPulse'
     };
 
-    const message = template.generateBody(mailInfo);
-    const subject = template.generateSubject(mailInfo);
+    const mailInfo = {
+      userName: subscription?.user?.name || 'Customer',
+      subscriptionName: subscription?.name || 'Subscription',
+      renewalDate: subscription?.renewalDate
+        ? dayjs(subscription.renewalDate).format('MMM D, YYYY')
+        : '',
+      planName: subscription?.planName || subscription?.name || 'Plan',
+      price: subscription?.price ? `${subscription.currency} ${subscription.price}` : '',
+      paymentMethod: subscription?.paymentMethod || '',
+      subject: type?.subject,
+      message: type?.message
+    };
+
+    const message = typeof type === 'object' ? type.message : template.generateBody(mailInfo);
+    const subject = typeof type === 'object' ? type.subject : template.generateSubject(mailInfo);
 
     const mailOptions = {
       from: accountEmail,
@@ -42,7 +45,7 @@ export const sendReminderEmail = async (to, type, subscription) => {
       html: message
     };
 
-    logger.info('Sending reminder email', { from: accountEmail, to, subject });
+    logger.info('Sending email', { from: accountEmail, to, subject });
 
     const info = await new Promise((resolve, reject) => {
       transporter.sendMail(mailOptions, (error, info) => {
@@ -58,9 +61,13 @@ export const sendReminderEmail = async (to, type, subscription) => {
     logger.info('Email sent successfully', { messageId: info.messageId });
     return info;
   } catch (error) {
-    logger.error('Failed to send reminder email', { error: error.message });
-    throw error;
+    logger.error('Failed to send email', { error: error.message });
+    return null;
   }
+};
+
+export const sendEmail = async ({ to, subject, message }) => {
+  return sendReminderEmail(to, { subject, message }, null);
 };
 
 export default sendReminderEmail;

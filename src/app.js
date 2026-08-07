@@ -2,6 +2,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 
 import requestIdMiddleware from './middleware/request-id.middleware.js';
+import securityHeadersMiddleware from './middleware/security-headers.middleware.js';
 import arcjetMiddleware from './middleware/arcjet.middleware.js';
 import errorMiddleware from './middleware/error.middleware.js';
 
@@ -13,7 +14,8 @@ import workflowRouter from './routes/workflow.routes.js';
 
 const app = express();
 
-// Core Middleware
+// Security Headers & Core Middleware
+app.use(securityHeadersMiddleware);
 app.use(requestIdMiddleware);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
