@@ -21,11 +21,17 @@
 ## ADR-004: Subscription Management 2.0 Domain Model & Decoupled Architecture (Phase 2)
 - **Status**: Approved & Executed (Phase 2)
 - **Context**: Basic CRUD subscription model lacked categorization taxonomies, audit timelines, multi-stage import validation, and search abstractions needed for future Billing (Phase 5) and AI scaling.
+- **Decision**: Implemented `Provider`, `Category`, and `Tag` models, generic `TimelineEvent` audit logs, `FileAsset`, `SubscriptionNote`, multi-stage import pipeline, and search query builder.
+- **Consequences**: 100% backward compatible, future-ready architecture, zero structural rework required.
+
+## ADR-005: Bounded Analytics & Insights Subsystem Architecture (Phase 3)
+- **Status**: Approved & Executed (Phase 3)
+- **Context**: Need for deterministic, explainable, read-only analytics separating projected recurring spend from historical actual spend.
 - **Decision**:
-  - Implemented `Provider`, `Category`, and `Tag` models.
-  - Decoupled search via `SearchService` -> `QueryBuilder` -> `Repository`.
-  - Replaced single-purpose history with generic `TimelineEvent` audit logs.
-  - Implemented reusable `FileAsset` and scalable `SubscriptionNote` models.
-  - Built multi-stage CSV/JSON import pipeline (`Preview` -> `Dry Run` -> `Execution`).
-  - Formalized full ISO 4217 currencies and frequencies (`Daily`, `Weekly`, `Monthly`, `Quarterly`, `Yearly`, `Custom`).
-- **Consequences**: 100% backward compatible, future-ready architecture, zero structural rework required for future phases.
+  - Encapsulated analytics subsystem inside `src/analytics/`.
+  - Implemented `AnalyticsQueryContext` to unify scope, timeframe, timezone, and archive/delete flags across all queries.
+  - Implemented `FrequencyNormalizer` for deterministic Monthly and Yearly equivalents (supporting custom interval units/values).
+  - Enforced strict multi-currency isolation without cross-currency sum additions.
+  - Built deterministic `InsightEngine` emitting rule-based insights with `INFO`, `WARNING`, and `IMPORTANT` severities.
+  - Built single optimized Dashboard Summary endpoint (`GET /api/v1/analytics/summary`).
+- **Consequences**: High performance, zero business logic mutations, explainable data, and zero AI dependencies.

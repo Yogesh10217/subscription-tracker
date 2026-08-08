@@ -27,6 +27,7 @@
     "docker:clean": "docker compose down -v --remove-orphans && docker system prune -f"
   },
   "imports": {
+    "#analytics/*": "./src/analytics/*",
     "#config/*": "./src/config/*",
     "#controllers/*": "./src/controllers/*",
     "#services/*": "./src/services/*",

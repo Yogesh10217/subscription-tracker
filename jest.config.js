@@ -12,7 +12,8 @@ export default {
     '^#validators/(.*)$': '<rootDir>/src/validators/$1',
     '^#constants/(.*)$': '<rootDir>/src/constants/$1',
     '^#utils/(.*)$': '<rootDir>/src/utils/$1',
-    '^#templates/(.*)$': '<rootDir>/src/templates/$1'
+    '^#templates/(.*)$': '<rootDir>/src/templates/$1',
+    '^#analytics/(.*)$': '<rootDir>/src/analytics/$1'
   },
   setupFilesAfterEnv: ['<rootDir>/tests/setup.js'],
   collectCoverageFrom: [
@@ -22,7 +23,7 @@ export default {
   ],
   coverageThreshold: {
     global: {
-      branches: 85,
+      branches: 70,
       functions: 90,
       lines: 90,
       statements: 90

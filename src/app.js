@@ -13,6 +13,7 @@ import subscriptionRouter from './routes/subscription.routes.js';
 import providerRouter from './routes/provider.routes.js';
 import categoryRouter from './routes/category.routes.js';
 import tagRouter from './routes/tag.routes.js';
+import analyticsRouter from './routes/analytics.routes.js';
 import workflowRouter from './routes/workflow.routes.js';
 
 const app = express();
@@ -36,6 +37,7 @@ app.use('/api/v1/subscriptions', subscriptionRouter);
 app.use('/api/v1/providers', providerRouter);
 app.use('/api/v1/categories', categoryRouter);
 app.use('/api/v1/tags', tagRouter);
+app.use('/api/v1/analytics', analyticsRouter);
 app.use('/api/v1/workflows', workflowRouter);
 
 // Global Error Handler

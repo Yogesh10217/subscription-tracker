@@ -21,6 +21,10 @@ export class UserRepository {
     return User.create(userData);
   }
 
+  async update(id, updateData) {
+    return User.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
+  }
+
   async findAll() {
     return User.find().select('-password');
   }
