@@ -179,13 +179,21 @@ export const modalsComponent = {
     e.preventDefault();
 
     const id = this.elements.subId ? this.elements.subId.value : null;
+    const paymentMethod = this.elements.subPaymentMethod.value.trim();
+    const validPaymentMethods = ['Credit Card', 'Debit Card', 'UPI', 'PayPal', 'Bank', 'Cash', 'Wallet', 'Other'];
+    
+    if (!validPaymentMethods.includes(paymentMethod)) {
+      domUtils.showToast(`Error: ${paymentMethod} is not a valid payment method. Please select from the dropdown.`, 'error');
+      return;
+    }
+
     const payload = {
       name: this.elements.subName.value.trim(),
       category: this.elements.subCategory.value,
       price: parseFloat(this.elements.subPrice.value),
       currency: this.elements.subCurrency.value,
       frequency: this.elements.subFrequency.value,
-      paymentMethod: this.elements.subPaymentMethod.value.trim(),
+      paymentMethod: paymentMethod,
       status: this.elements.subStatus.value,
       startDate: this.elements.subStartDate.value,
       renewalDate: this.elements.subRenewalDate.value
