@@ -1,11 +1,9 @@
-version: '3.8'
-
 services:
   # ==========================================
   # MongoDB Database Service
   # ==========================================
   mongodb:
-    image: mongo:7.0-alpine
+    image: mongo:7.0
     container_name: subpulse-mongo
     restart: unless-stopped
     ports:
