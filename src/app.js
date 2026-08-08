@@ -10,6 +10,9 @@ import healthRouter from './routes/health.routes.js';
 import authRouter from './routes/auth.routes.js';
 import userRouter from './routes/user.routes.js';
 import subscriptionRouter from './routes/subscription.routes.js';
+import providerRouter from './routes/provider.routes.js';
+import categoryRouter from './routes/category.routes.js';
+import tagRouter from './routes/tag.routes.js';
 import workflowRouter from './routes/workflow.routes.js';
 
 const app = express();
@@ -30,6 +33,9 @@ app.use('/', healthRouter);
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/subscriptions', subscriptionRouter);
+app.use('/api/v1/providers', providerRouter);
+app.use('/api/v1/categories', categoryRouter);
+app.use('/api/v1/tags', tagRouter);
 app.use('/api/v1/workflows', workflowRouter);
 
 // Global Error Handler

@@ -2,24 +2,30 @@
 
 ## ADR-001: Migration to N-Tier Layered Architecture (`src/`)
 - **Status**: Approved & Executed (Phase 0)
-- **Context**: The codebase previously contained monolithic controllers executing direct Mongoose DB calls, managing transactions, password hashing, and formatting responses in single functions.
-- **Decision**: Separated concerns into Routes, Controllers, Services, Repositories, Validators, and Utilities under `src/`.
-- **Consequences**: Enhanced testability, clean unit test mocking capability, and eliminated cross-layer pollution.
+- **Context**: Monolithic architecture with mixed DB and business logic.
+- **Decision**: Separated concerns into Routes, Controllers, Services, Repositories, Validators, and Utilities.
+- **Consequences**: High testability and clean unit test isolation.
 
 ## ADR-002: Adoption of ESLint, Prettier, Husky, and Jest (Phase 0.1)
 - **Status**: Approved & Executed (Phase 0.1)
-- **Context**: Project lacked standardized linting, formatting enforcement, pre-commit validation, and automated unit/integration test suites.
-- **Decision**: Configured ESLint (`.eslintrc.json`), Prettier (`.prettierrc`), Husky pre-commit hooks (`.husky/`), and Jest/Supertest (`jest.config.js`).
-- **Consequences**: Guaranteed code style consistency, zero untested logic, and pre-commit regression safety.
+- **Context**: Lack of automated code style and quality enforcement.
+- **Decision**: Standardized tools (`.eslintrc.json`, `.prettierrc`, `.husky/`, `jest.config.js`).
+- **Consequences**: Guaranteed style consistency and pre-commit regression checks.
 
 ## ADR-003: Enterprise Authentication Architecture & Token Family Rotation (Phase 1)
 - **Status**: Approved & Executed (Phase 1)
-- **Context**: JWT authentication relied solely on single access tokens without revocation, refresh token family rotation, device session tracking, account lockout, or permission-based RBAC.
+- **Context**: Simple JWT authentication without revocation or session tracking.
+- **Decision**: Access Tokens (15m) + Refresh Token Family Rotation (7d), session device tracking, account lockout, hashed verification tokens, Helmet headers, and audit logging.
+- **Consequences**: Production security and multi-device session governance.
+
+## ADR-004: Subscription Management 2.0 Domain Model & Decoupled Architecture (Phase 2)
+- **Status**: Approved & Executed (Phase 2)
+- **Context**: Basic CRUD subscription model lacked categorization taxonomies, audit timelines, multi-stage import validation, and search abstractions needed for future Billing (Phase 5) and AI scaling.
 - **Decision**:
-  - Implemented short-lived Access Tokens (15m) + Refresh Token Family Rotation (7d).
-  - Adopted `Session` model tracking device metadata and token hashes.
-  - Implemented token replay attack detection revoking entire token families upon token reuse.
-  - Stored verification tokens as SHA-256 hashes (`verification-token.model.js`).
-  - Adopted permission-based RBAC (`requirePermission`, `requireRole`) and Helmet security headers.
-  - Decoupled auth services into `auth.service`, `session.service`, `password.service`, `verification.service`, `audit.service`.
-- **Consequences**: Enterprise production security, complete session visibility, replay protection, and zero-redesign extension points for future MFA, SSO, and Organizations.
+  - Implemented `Provider`, `Category`, and `Tag` models.
+  - Decoupled search via `SearchService` -> `QueryBuilder` -> `Repository`.
+  - Replaced single-purpose history with generic `TimelineEvent` audit logs.
+  - Implemented reusable `FileAsset` and scalable `SubscriptionNote` models.
+  - Built multi-stage CSV/JSON import pipeline (`Preview` -> `Dry Run` -> `Execution`).
+  - Formalized full ISO 4217 currencies and frequencies (`Daily`, `Weekly`, `Monthly`, `Quarterly`, `Yearly`, `Custom`).
+- **Consequences**: 100% backward compatible, future-ready architecture, zero structural rework required for future phases.

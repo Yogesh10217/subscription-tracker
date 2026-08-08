@@ -14,11 +14,14 @@ describe('Subscriptions API Integration Tests', () => {
   });
 
   test('GET /api/v1/subscriptions should return 200 array response', async () => {
+    const token = generateTestToken();
     jest
       .spyOn(subscriptionRepository, 'findAll')
       .mockResolvedValue([{ _id: '507f1f77bcf86cd799439022', name: 'Netflix', price: 15.99 }]);
 
-    const res = await request(app).get('/api/v1/subscriptions');
+    const res = await request(app)
+      .get('/api/v1/subscriptions')
+      .set('Authorization', `Bearer ${token}`);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
   });
