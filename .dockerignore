@@ -11,6 +11,7 @@ logs
 .env*
 !.env.example
 !.env.production
+!scripts
 Dockerfile
 docker-compose*.yml
 README.md
