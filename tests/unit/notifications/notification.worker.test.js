@@ -15,7 +15,9 @@ describe('NotificationWorker Unit Tests', () => {
     await expect(NotificationWorker.processJob({})).rejects.toThrow('notificationId is required');
 
     jest.spyOn(notificationRepository, 'findById').mockResolvedValue(null);
-    await expect(NotificationWorker.processJob({ notificationId: 'n1' })).rejects.toThrow('record not found');
+    await expect(NotificationWorker.processJob({ notificationId: 'n1' })).rejects.toThrow(
+      'record not found'
+    );
   });
 
   test('processJob skips if invalid status transition', async () => {
