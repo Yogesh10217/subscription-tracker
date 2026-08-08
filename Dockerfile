@@ -5,7 +5,7 @@ FROM node:20-alpine AS deps
 WORKDIR /app
 
 # Install build dependencies if needed
-RUN apk add --no-libc-dev --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat
 
 COPY package*.json ./
 RUN npm ci --only=production && npm cache clean --force
