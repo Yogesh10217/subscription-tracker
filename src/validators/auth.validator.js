@@ -12,8 +12,8 @@ export const validateSignUp = (req, res, next) => {
     errors.push({ field: 'email', message: 'Valid email address is required' });
   }
 
-  if (!password || typeof password !== 'string' || password.length < 6) {
-    errors.push({ field: 'password', message: 'Password must be at least 6 characters' });
+  if (!password || typeof password !== 'string' || password.length < 8) {
+    errors.push({ field: 'password', message: 'Password must be at least 8 characters long' });
   }
 
   if (errors.length > 0) {
