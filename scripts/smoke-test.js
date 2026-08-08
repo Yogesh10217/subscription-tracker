@@ -20,12 +20,8 @@ async function runSmokeTests() {
     { path: '/health', expected: [200], label: 'System Health Check' },
     { path: '/ready', expected: [200], label: 'Readiness Probe' },
     { path: '/live', expected: [200], label: 'Liveness Probe' },
-    {
-      path: '/api/v1/subscriptions',
-      expected: [200, 401],
-      label: 'Subscriptions Endpoint (Secured)'
-    },
-    { path: '/api/v1/users', expected: [200, 401], label: 'Users Endpoint (Secured)' },
+    { path: '/api/v1/subscriptions/upcoming-renewals', expected: [200], label: 'Upcoming Renewals Endpoint' },
+    { path: '/api/v1/users', expected: [200, 401], label: 'Users Endpoint' },
     { path: '/', expected: [200], label: 'Frontend Dashboard Index' }
   ];
 
