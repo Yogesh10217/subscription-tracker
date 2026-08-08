@@ -1,9 +1,9 @@
 import { jest } from '@jest/globals';
-import NotificationWorker from '#src/notifications/workers/notification.worker.js';
-import notificationRepository from '#src/notifications/repositories/notification.repository.js';
+import NotificationWorker from '#notifications/workers/notification.worker.js';
+import notificationRepository from '#notifications/repositories/notification.repository.js';
 import userRepository from '#repositories/user.repository.js';
-import emailProvider from '#src/notifications/providers/email.provider.js';
-import NotificationDeliveryStatus from '#src/notifications/constants/notification-status.js';
+import emailProvider from '#notifications/providers/email.provider.js';
+import NotificationDeliveryStatus from '#notifications/constants/notification-status.js';
 
 describe('NotificationWorker Unit Tests', () => {
   afterEach(() => {

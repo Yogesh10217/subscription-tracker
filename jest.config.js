@@ -13,7 +13,8 @@ export default {
     '^#constants/(.*)$': '<rootDir>/src/constants/$1',
     '^#utils/(.*)$': '<rootDir>/src/utils/$1',
     '^#templates/(.*)$': '<rootDir>/src/templates/$1',
-    '^#analytics/(.*)$': '<rootDir>/src/analytics/$1'
+    '^#analytics/(.*)$': '<rootDir>/src/analytics/$1',
+    '^#notifications/(.*)$': '<rootDir>/src/notifications/$1'
   },
   setupFilesAfterEnv: ['<rootDir>/tests/setup.js'],
   collectCoverageFrom: [
