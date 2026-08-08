@@ -41,7 +41,9 @@ describe('ImportService Unit Tests', () => {
     expect(skippedRes.skippedCount).toBe(1);
     expect(skippedRes.importedCount).toBe(0);
 
-    const importedRes = await importService.executeImport(records, 'u123', { skipDuplicates: false });
+    const importedRes = await importService.executeImport(records, 'u123', {
+      skipDuplicates: false
+    });
     expect(importedRes.importedCount).toBe(1);
   });
 });

@@ -46,11 +46,17 @@ describe('AuthService Extended Unit Tests', () => {
     jest.spyOn(passwordService, 'validatePasswordPolicy').mockReturnValue(true);
     jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(null);
     jest.spyOn(userRepository, 'create').mockResolvedValue(mockUser);
-    jest.spyOn(verificationService, 'createVerificationToken').mockResolvedValue({ rawToken: 'raw123' });
+    jest
+      .spyOn(verificationService, 'createVerificationToken')
+      .mockResolvedValue({ rawToken: 'raw123' });
     jest.spyOn(sessionService, 'createSession').mockResolvedValue({ _id: 'session123' });
     jest.spyOn(auditService, 'logEvent').mockResolvedValue({});
 
-    const res = await authService.signUp({ name: 'John', email: 'john@example.com', password: 'Password123!' });
+    const res = await authService.signUp({
+      name: 'John',
+      email: 'john@example.com',
+      password: 'Password123!'
+    });
     expect(res.user.email).toBe('john@example.com');
     expect(res.tokens.accessToken).toBeDefined();
     expect(res.session._id).toBe('session123');
@@ -60,7 +66,9 @@ describe('AuthService Extended Unit Tests', () => {
     jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(null);
     jest.spyOn(auditService, 'logEvent').mockResolvedValue({});
 
-    await expect(authService.signIn({ email: 'john@example.com', password: 'pass' })).rejects.toThrow(ApiError);
+    await expect(
+      authService.signIn({ email: 'john@example.com', password: 'pass' })
+    ).rejects.toThrow(ApiError);
   });
 
   test('signIn should reject locked account', async () => {
@@ -71,7 +79,9 @@ describe('AuthService Extended Unit Tests', () => {
     jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(lockedUser);
     jest.spyOn(auditService, 'logEvent').mockResolvedValue({});
 
-    await expect(authService.signIn({ email: 'john@example.com', password: 'pass' })).rejects.toThrow(ApiError);
+    await expect(
+      authService.signIn({ email: 'john@example.com', password: 'pass' })
+    ).rejects.toThrow(ApiError);
   });
 
   test('signIn should increment failedLoginAttempts and lock account on max attempts', async () => {
@@ -84,8 +94,13 @@ describe('AuthService Extended Unit Tests', () => {
     jest.spyOn(userRepository, 'update').mockResolvedValue({});
     jest.spyOn(auditService, 'logEvent').mockResolvedValue({});
 
-    await expect(authService.signIn({ email: 'john@example.com', password: 'wrong' })).rejects.toThrow(ApiError);
-    expect(userRepository.update).toHaveBeenCalledWith(failingUser._id, expect.objectContaining({ failedLoginAttempts: 5 }));
+    await expect(
+      authService.signIn({ email: 'john@example.com', password: 'wrong' })
+    ).rejects.toThrow(ApiError);
+    expect(userRepository.update).toHaveBeenCalledWith(
+      failingUser._id,
+      expect.objectContaining({ failedLoginAttempts: 5 })
+    );
   });
 
   test('refreshTokens should validate and rotate tokens', async () => {
@@ -111,7 +126,9 @@ describe('AuthService Extended Unit Tests', () => {
     await authService.forgotPassword('nonexistent@example.com');
 
     jest.spyOn(userRepository, 'findByEmail').mockResolvedValueOnce(mockUser);
-    jest.spyOn(verificationService, 'createVerificationToken').mockResolvedValue({ rawToken: 'reset123' });
+    jest
+      .spyOn(verificationService, 'createVerificationToken')
+      .mockResolvedValue({ rawToken: 'reset123' });
     jest.spyOn(auditService, 'logEvent').mockResolvedValue({});
 
     await authService.forgotPassword('john@example.com');
@@ -120,7 +137,9 @@ describe('AuthService Extended Unit Tests', () => {
 
   test('resetPassword should successfully update password or throw if user missing', async () => {
     jest.spyOn(passwordService, 'validatePasswordPolicy').mockReturnValue(true);
-    jest.spyOn(verificationService, 'verifyToken').mockResolvedValue({ _id: 'tok1', user: mockUser._id });
+    jest
+      .spyOn(verificationService, 'verifyToken')
+      .mockResolvedValue({ _id: 'tok1', user: mockUser._id });
     jest.spyOn(userRepository, 'findByIdRaw').mockResolvedValue(null);
 
     await expect(authService.resetPassword('raw123', 'NewPass123!')).rejects.toThrow(ApiError);
@@ -139,7 +158,9 @@ describe('AuthService Extended Unit Tests', () => {
 
   test('resetPassword should throw error if password is reused', async () => {
     jest.spyOn(passwordService, 'validatePasswordPolicy').mockReturnValue(true);
-    jest.spyOn(verificationService, 'verifyToken').mockResolvedValue({ _id: 'tok1', user: mockUser._id });
+    jest
+      .spyOn(verificationService, 'verifyToken')
+      .mockResolvedValue({ _id: 'tok1', user: mockUser._id });
     jest.spyOn(userRepository, 'findByIdRaw').mockResolvedValue(mockUser);
     jest.spyOn(passwordService, 'isPasswordReused').mockResolvedValue(true);
 
@@ -150,15 +171,21 @@ describe('AuthService Extended Unit Tests', () => {
     jest.spyOn(passwordService, 'validatePasswordPolicy').mockReturnValue(true);
     jest.spyOn(userRepository, 'findByIdRaw').mockResolvedValue(null);
 
-    await expect(authService.changePassword(mockUser._id, 'current', 'New123!')).rejects.toThrow(ApiError);
+    await expect(authService.changePassword(mockUser._id, 'current', 'New123!')).rejects.toThrow(
+      ApiError
+    );
 
     jest.spyOn(userRepository, 'findByIdRaw').mockResolvedValue(mockUser);
     jest.spyOn(bcrypt, 'compare').mockResolvedValue(false);
-    await expect(authService.changePassword(mockUser._id, 'wrong', 'New123!')).rejects.toThrow(ApiError);
+    await expect(authService.changePassword(mockUser._id, 'wrong', 'New123!')).rejects.toThrow(
+      ApiError
+    );
 
     jest.spyOn(bcrypt, 'compare').mockResolvedValue(true);
     jest.spyOn(passwordService, 'isPasswordReused').mockResolvedValue(true);
-    await expect(authService.changePassword(mockUser._id, 'current', 'New123!')).rejects.toThrow(ApiError);
+    await expect(authService.changePassword(mockUser._id, 'current', 'New123!')).rejects.toThrow(
+      ApiError
+    );
 
     jest.spyOn(passwordService, 'isPasswordReused').mockResolvedValue(false);
     jest.spyOn(passwordService, 'hashPassword').mockResolvedValue('hash');
@@ -170,7 +197,9 @@ describe('AuthService Extended Unit Tests', () => {
   });
 
   test('verifyEmail should update user and consume token', async () => {
-    jest.spyOn(verificationService, 'verifyToken').mockResolvedValue({ _id: 'tok1', user: mockUser._id });
+    jest
+      .spyOn(verificationService, 'verifyToken')
+      .mockResolvedValue({ _id: 'tok1', user: mockUser._id });
     jest.spyOn(userRepository, 'update').mockResolvedValue({});
     jest.spyOn(verificationService, 'consumeToken').mockResolvedValue({});
     jest.spyOn(auditService, 'logEvent').mockResolvedValue({});

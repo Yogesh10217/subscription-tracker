@@ -113,7 +113,9 @@ describe('Domain CRUD Services Unit Tests', () => {
     test('addRule, getRules, updateRule, deleteRule', async () => {
       jest.spyOn(subscriptionRepository, 'findById').mockResolvedValue({ _id: 's1', user: 'u1' });
       jest.spyOn(reminderRuleRepository, 'create').mockResolvedValue({ daysBefore: 3 });
-      jest.spyOn(reminderRuleRepository, 'findBySubscription').mockResolvedValue([{ daysBefore: 3 }]);
+      jest
+        .spyOn(reminderRuleRepository, 'findBySubscription')
+        .mockResolvedValue([{ daysBefore: 3 }]);
       jest.spyOn(reminderRuleRepository, 'update').mockResolvedValue({ daysBefore: 5 });
       jest.spyOn(reminderRuleRepository, 'delete').mockResolvedValue({ _id: 'r1' });
 
@@ -144,7 +146,9 @@ describe('Domain CRUD Services Unit Tests', () => {
     test('addNote, getNotes, deleteNote', async () => {
       jest.spyOn(subscriptionRepository, 'findById').mockResolvedValue({ _id: 's1', user: 'u1' });
       jest.spyOn(subscriptionNoteRepository, 'create').mockResolvedValue({ text: 'Note 1' });
-      jest.spyOn(subscriptionNoteRepository, 'findBySubscription').mockResolvedValue([{ text: 'Note 1' }]);
+      jest
+        .spyOn(subscriptionNoteRepository, 'findBySubscription')
+        .mockResolvedValue([{ text: 'Note 1' }]);
       jest.spyOn(subscriptionNoteRepository, 'delete').mockResolvedValue({ _id: 'n1' });
 
       const added = await subscriptionNoteService.addNote('s1', 'u1', 'Note 1');
@@ -168,7 +172,9 @@ describe('Domain CRUD Services Unit Tests', () => {
     test('addFileAsset, getFileAssets, deleteFileAsset', async () => {
       jest.spyOn(subscriptionRepository, 'findById').mockResolvedValue({ _id: 's1', user: 'u1' });
       jest.spyOn(fileAssetRepository, 'create').mockResolvedValue({ fileName: 'file.pdf' });
-      jest.spyOn(fileAssetRepository, 'findBySubscription').mockResolvedValue([{ fileName: 'file.pdf' }]);
+      jest
+        .spyOn(fileAssetRepository, 'findBySubscription')
+        .mockResolvedValue([{ fileName: 'file.pdf' }]);
       jest.spyOn(fileAssetRepository, 'delete').mockResolvedValue({ _id: 'f1' });
 
       const added = await fileAssetService.addFileAsset('s1', 'u1', { fileName: 'file.pdf' });
@@ -190,12 +196,24 @@ describe('Domain CRUD Services Unit Tests', () => {
 
   describe('TimelineService', () => {
     test('recordEvent, getEntityTimeline, getPriceHistory, getRenewalHistory', async () => {
-      jest.spyOn(timelineEventRepository, 'createEvent').mockResolvedValue({ eventType: 'CREATED' });
-      jest.spyOn(timelineEventRepository, 'findByEntity').mockResolvedValue([{ eventType: 'CREATED' }]);
-      jest.spyOn(timelineEventRepository, 'findPriceHistory').mockResolvedValue([{ eventType: 'PRICE_CHANGE' }]);
-      jest.spyOn(timelineEventRepository, 'findRenewalHistory').mockResolvedValue([{ eventType: 'RENEWAL' }]);
+      jest
+        .spyOn(timelineEventRepository, 'createEvent')
+        .mockResolvedValue({ eventType: 'CREATED' });
+      jest
+        .spyOn(timelineEventRepository, 'findByEntity')
+        .mockResolvedValue([{ eventType: 'CREATED' }]);
+      jest
+        .spyOn(timelineEventRepository, 'findPriceHistory')
+        .mockResolvedValue([{ eventType: 'PRICE_CHANGE' }]);
+      jest
+        .spyOn(timelineEventRepository, 'findRenewalHistory')
+        .mockResolvedValue([{ eventType: 'RENEWAL' }]);
 
-      const rec = await timelineService.recordEvent({ entityId: 's1', user: 'u1', eventType: 'CREATED' });
+      const rec = await timelineService.recordEvent({
+        entityId: 's1',
+        user: 'u1',
+        eventType: 'CREATED'
+      });
       expect(rec.eventType).toBe('CREATED');
 
       const timeline = await timelineService.getEntityTimeline('s1');
@@ -259,7 +277,9 @@ describe('Domain CRUD Services Unit Tests', () => {
     });
 
     test('emailService delegates to sendReminder', async () => {
-      const res = await emailService.sendReminder('test@example.com', '7 days before reminder', { name: 'Netflix' });
+      const res = await emailService.sendReminder('test@example.com', '7 days before reminder', {
+        name: 'Netflix'
+      });
       expect(res).toBeDefined();
     });
   });

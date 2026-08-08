@@ -58,9 +58,13 @@ describe('Controller Layer Unit Tests', () => {
 
   describe('AuthController', () => {
     test('signUp, signIn, refreshToken, logout, logoutAll, forgotPassword, resetPassword, changePassword, verifyEmail, resendVerification, getSessions, revokeSession', async () => {
-      jest.spyOn(authService, 'signUp').mockResolvedValue({ tokens: { refreshToken: 'r' }, user: { email: 'test@example.com' } });
+      jest
+        .spyOn(authService, 'signUp')
+        .mockResolvedValue({ tokens: { refreshToken: 'r' }, user: { email: 'test@example.com' } });
       jest.spyOn(authService, 'signIn').mockResolvedValue({ refreshToken: 'r', accessToken: 'a' });
-      jest.spyOn(authService, 'refreshTokens').mockResolvedValue({ accessToken: 'a2', refreshToken: 'r2' });
+      jest
+        .spyOn(authService, 'refreshTokens')
+        .mockResolvedValue({ accessToken: 'a2', refreshToken: 'r2' });
       jest.spyOn(authService, 'forgotPassword').mockResolvedValue();
       jest.spyOn(authService, 'resetPassword').mockResolvedValue();
       jest.spyOn(authService, 'changePassword').mockResolvedValue();
@@ -273,7 +277,9 @@ describe('Controller Layer Unit Tests', () => {
       jest.spyOn(analyticsService, 'getTrends').mockResolvedValue({});
       jest.spyOn(analyticsService, 'getPriceChanges').mockResolvedValue({});
       jest.spyOn(analyticsService, 'getInsights').mockResolvedValue({});
-      jest.spyOn(workflowService, 'processSubscriptionReminder').mockResolvedValue({ processed: true });
+      jest
+        .spyOn(workflowService, 'processSubscriptionReminder')
+        .mockResolvedValue({ processed: true });
 
       await analyticsController.getSummary(req, res);
       await analyticsController.getSpending(req, res);

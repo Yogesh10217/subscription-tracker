@@ -17,7 +17,9 @@ describe('VerificationService Unit Tests', () => {
   });
 
   test('verifyToken should throw error if token missing or not found', async () => {
-    await expect(verificationService.verifyToken(null, 'email_verification')).rejects.toThrow(ApiError);
+    await expect(verificationService.verifyToken(null, 'email_verification')).rejects.toThrow(
+      ApiError
+    );
 
     jest.spyOn(securityRepository, 'findVerificationToken').mockResolvedValue(null);
     await expect(

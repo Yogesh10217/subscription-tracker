@@ -37,7 +37,11 @@ describe('Email & Utility & Constants Unit Tests', () => {
     const reminderInfo = await sendReminderEmail('test@example.com', '7 days before reminder', sub);
     expect(reminderInfo.messageId).toBe('msg123');
 
-    const fallbackInfo = await sendReminderEmail('test@example.com', 'Custom Unregistered Type', sub);
+    const fallbackInfo = await sendReminderEmail(
+      'test@example.com',
+      'Custom Unregistered Type',
+      sub
+    );
     expect(fallbackInfo.messageId).toBe('msg123');
   });
 

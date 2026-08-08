@@ -42,14 +42,17 @@ describe('QueryBuilder Unit Tests', () => {
   });
 
   test('buildFilter handles partial boolean and range options', () => {
-    const filter = QueryBuilder.buildFilter({
-      isFavorite: false,
-      isPinned: false,
-      isArchived: true,
-      isTrial: false,
-      minPrice: 5,
-      startDate: '2026-05-01'
-    }, 'user123');
+    const filter = QueryBuilder.buildFilter(
+      {
+        isFavorite: false,
+        isPinned: false,
+        isArchived: true,
+        isTrial: false,
+        minPrice: 5,
+        startDate: '2026-05-01'
+      },
+      'user123'
+    );
 
     expect(filter.isFavorite).toBe(false);
     expect(filter.isPinned).toBe(false);

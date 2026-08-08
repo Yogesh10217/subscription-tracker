@@ -150,7 +150,17 @@ describe('All Validators Unit Tests', () => {
     expect(next).toHaveBeenCalledWith(expect.any(ApiError));
 
     next.mockClear();
-    req.body = { records: [{ name: 'Netflix', price: 10, category: 'Other', paymentMethod: 'Card', startDate: '2026-01-01' }] };
+    req.body = {
+      records: [
+        {
+          name: 'Netflix',
+          price: 10,
+          category: 'Other',
+          paymentMethod: 'Card',
+          startDate: '2026-01-01'
+        }
+      ]
+    };
     validateImportExport(req, res, next);
     expect(next).toHaveBeenCalledWith();
   });

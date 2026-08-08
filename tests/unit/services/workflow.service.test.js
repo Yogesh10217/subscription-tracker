@@ -15,7 +15,9 @@ describe('WorkflowService Unit Tests', () => {
   });
 
   test('processSubscriptionReminder handles base64 encoded QStash body array', async () => {
-    const encodedPayload = Buffer.from(JSON.stringify({ subscriptionId: 'sub123' })).toString('base64');
+    const encodedPayload = Buffer.from(JSON.stringify({ subscriptionId: 'sub123' })).toString(
+      'base64'
+    );
     jest.spyOn(subscriptionRepository, 'findByIdWithUser').mockResolvedValue(null);
 
     await expect(
@@ -25,7 +27,9 @@ describe('WorkflowService Unit Tests', () => {
 
   test('processSubscriptionReminder throws notFound if subscription missing', async () => {
     jest.spyOn(subscriptionRepository, 'findByIdWithUser').mockResolvedValue(null);
-    await expect(workflowService.processSubscriptionReminder({ subscriptionId: 'missing' })).rejects.toThrow(ApiError);
+    await expect(
+      workflowService.processSubscriptionReminder({ subscriptionId: 'missing' })
+    ).rejects.toThrow(ApiError);
   });
 
   test('processSubscriptionReminder returns inactive message if status not Active', async () => {
@@ -46,7 +50,9 @@ describe('WorkflowService Unit Tests', () => {
       user: {}
     });
 
-    await expect(workflowService.processSubscriptionReminder({ subscriptionId: 'sub1' })).rejects.toThrow(ApiError);
+    await expect(
+      workflowService.processSubscriptionReminder({ subscriptionId: 'sub1' })
+    ).rejects.toThrow(ApiError);
   });
 
   test('processSubscriptionReminder handles past renewal date and active reminders', async () => {
@@ -69,7 +75,9 @@ describe('WorkflowService Unit Tests', () => {
       user: { email: 'user@example.com' }
     });
 
-    const successRes = await workflowService.processSubscriptionReminder({ subscriptionId: 'sub1' });
+    const successRes = await workflowService.processSubscriptionReminder({
+      subscriptionId: 'sub1'
+    });
     expect(successRes.message).toBe('Reminder email sent successfully');
   });
 });

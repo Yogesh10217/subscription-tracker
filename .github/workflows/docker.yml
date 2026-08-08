@@ -29,7 +29,7 @@ jobs:
 
       - name: Local Docker Compose Smoke Test
         run: |
-          docker compose --profile production up -d
-          sleep 10
+          docker compose --profile production up -d --wait || sleep 15
           node scripts/smoke-test.js
           docker compose --profile production down
+

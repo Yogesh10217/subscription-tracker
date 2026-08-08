@@ -6,9 +6,7 @@ describe('InsightEngine Unit Tests', () => {
     const data = {
       categoryAnalytics: {
         USD: {
-          categories: [
-            { name: 'Streaming', percentage: 65, monthlySpend: 100 }
-          ]
+          categories: [{ name: 'Streaming', percentage: 65, monthlySpend: 100 }]
         }
       },
       renewalAnalytics: {
@@ -35,7 +33,7 @@ describe('InsightEngine Unit Tests', () => {
     const insights = InsightEngine.generateInsights(data);
     expect(insights.length).toBeGreaterThan(0);
 
-    const categoryInsight = insights.find(i => i.type === 'CATEGORY_CONCENTRATION');
+    const categoryInsight = insights.find((i) => i.type === 'CATEGORY_CONCENTRATION');
     expect(categoryInsight.severity).toBe('IMPORTANT');
   });
 

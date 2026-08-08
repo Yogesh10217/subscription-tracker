@@ -46,7 +46,9 @@ describe('SessionService Unit Tests', () => {
 
   test('rotateSession handles normal rotation', async () => {
     jest.spyOn(sessionRepository, 'findAnyByRefreshToken').mockResolvedValue(mockSession);
-    jest.spyOn(sessionRepository, 'rotate').mockResolvedValue({ ...mockSession, refreshTokenHash: 'newhash' });
+    jest
+      .spyOn(sessionRepository, 'rotate')
+      .mockResolvedValue({ ...mockSession, refreshTokenHash: 'newhash' });
     jest.spyOn(auditService, 'logEvent').mockResolvedValue({});
 
     const rotated = await sessionService.rotateSession('valid-token', 'new-token');
@@ -59,7 +61,9 @@ describe('SessionService Unit Tests', () => {
     jest.spyOn(sessionRepository, 'revokeFamily').mockResolvedValue({});
     jest.spyOn(auditService, 'logEvent').mockResolvedValue({});
 
-    await expect(sessionService.rotateSession('valid-token', 'new-token')).rejects.toThrow(ApiError);
+    await expect(sessionService.rotateSession('valid-token', 'new-token')).rejects.toThrow(
+      ApiError
+    );
     expect(sessionRepository.revokeFamily).toHaveBeenCalledWith('fam123', expect.any(String));
   });
 
