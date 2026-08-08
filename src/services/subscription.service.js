@@ -48,8 +48,12 @@ export class SubscriptionService {
         workflowId = qstashResponse?.scheduleId || qstashResponse?.messageId || qstashResponse?.id;
       }
     } catch (workflowErr) {
-      if (NODE_ENV === 'development' && QSTASH_TOKEN === 'development') {
-        logger.debug('QStash offline/mock mode in development - subscription created successfully', {
+      if (
+        NODE_ENV === 'development' ||
+        workflowErr.message?.includes('fetch failed') ||
+        workflowErr.message?.includes('ECONNREFUSED')
+      ) {
+        logger.info('QStash server offline/unreachable (subscription created successfully)', {
           subscriptionId: subscription.id,
           reason: workflowErr.message
         });
