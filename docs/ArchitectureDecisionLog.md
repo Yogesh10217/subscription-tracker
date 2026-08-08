@@ -27,11 +27,16 @@
 ## ADR-005: Bounded Analytics & Insights Subsystem Architecture (Phase 3)
 - **Status**: Approved & Executed (Phase 3)
 - **Context**: Need for deterministic, explainable, read-only analytics separating projected recurring spend from historical actual spend.
-- **Decision**:
-  - Encapsulated analytics subsystem inside `src/analytics/`.
-  - Implemented `AnalyticsQueryContext` to unify scope, timeframe, timezone, and archive/delete flags across all queries.
-  - Implemented `FrequencyNormalizer` for deterministic Monthly and Yearly equivalents (supporting custom interval units/values).
-  - Enforced strict multi-currency isolation without cross-currency sum additions.
-  - Built deterministic `InsightEngine` emitting rule-based insights with `INFO`, `WARNING`, and `IMPORTANT` severities.
-  - Built single optimized Dashboard Summary endpoint (`GET /api/v1/analytics/summary`).
+- **Decision**: Encapsulated analytics subsystem inside `src/analytics/` with `AnalyticsQueryContext`, `FrequencyNormalizer`, safe multi-currency isolation, and `InsightEngine`.
 - **Consequences**: High performance, zero business logic mutations, explainable data, and zero AI dependencies.
+
+## ADR-006: Notification Platform & Asynchronous Delivery Subsystem Architecture (Phase 4)
+- **Status**: Approved & Executed (Phase 4)
+- **Context**: Need for asynchronous, idempotent, and retryable email/in-app notifications for renewals, trials, price changes, and lifecycle events.
+- **Decision**:
+  - Built bounded `src/notifications/` subsystem with provider abstraction (`NotificationProviderInterface`, `EmailProvider`).
+  - Separated `deliveryStatus` (`PENDING`, `SCHEDULED`, `PROCESSING`, `SENT`, `DELIVERED`, `FAILED`, `CANCELLED`, `RETRYING`) from user read timestamp (`readAt`).
+  - Enforced atomic concurrency protection using SHA-256 `idempotencyKey` unique MongoDB index (`E11000 duplicate key` handled gracefully).
+  - Classifies delivery failures into `TRANSIENT` (exponential backoff retry: 1m, 5m, 15m, 30m, 60m) vs `PERMANENT`.
+  - QStash worker endpoint signature verification guard.
+- **Consequences**: Production-ready, asynchronous, auditable, and idempotent notification platform.

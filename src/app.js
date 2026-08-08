@@ -14,6 +14,8 @@ import providerRouter from './routes/provider.routes.js';
 import categoryRouter from './routes/category.routes.js';
 import tagRouter from './routes/tag.routes.js';
 import analyticsRouter from './routes/analytics.routes.js';
+import notificationRouter from './notifications/routes/notification.routes.js';
+import notificationPreferenceRouter from './notifications/routes/notification-preference.routes.js';
 import workflowRouter from './routes/workflow.routes.js';
 
 const app = express();
@@ -38,6 +40,8 @@ app.use('/api/v1/providers', providerRouter);
 app.use('/api/v1/categories', categoryRouter);
 app.use('/api/v1/tags', tagRouter);
 app.use('/api/v1/analytics', analyticsRouter);
+app.use('/api/v1/notifications', notificationRouter);
+app.use('/api/v1/notification-preferences', notificationPreferenceRouter);
 app.use('/api/v1/workflows', workflowRouter);
 
 // Global Error Handler

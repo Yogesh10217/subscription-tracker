@@ -28,6 +28,7 @@
   },
   "imports": {
     "#analytics/*": "./src/analytics/*",
+    "#notifications/*": "./src/notifications/*",
     "#config/*": "./src/config/*",
     "#controllers/*": "./src/controllers/*",
     "#services/*": "./src/services/*",
