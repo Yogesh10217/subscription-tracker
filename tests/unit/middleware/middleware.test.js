@@ -8,6 +8,7 @@ import userRepository from '#repositories/user.repository.js';
 import jwt from 'jsonwebtoken';
 import ApiError from '#utils/api-error.js';
 import { JWT_SECRET } from '#config/env.js';
+import aj from '#config/arcjet.js';
 
 describe('Middleware Unit Tests', () => {
   let req, res, next;
