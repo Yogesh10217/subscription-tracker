@@ -1,7 +1,7 @@
 import subscriptionRepository from '../repositories/subscription.repository.js';
 import timelineService from './timeline.service.js';
 import workflowClient from '../config/upstash.js';
-import { SERVER_URL } from '../config/env.js';
+import { SERVER_URL, NODE_ENV, QSTASH_TOKEN } from '../config/env.js';
 import ApiError from '../utils/api-error.js';
 import logger from '../utils/logger.js';
 
@@ -48,9 +48,16 @@ export class SubscriptionService {
         workflowId = qstashResponse?.scheduleId || qstashResponse?.messageId || qstashResponse?.id;
       }
     } catch (workflowErr) {
-      logger.warn('QStash workflow trigger warning (continuing creation)', {
-        error: workflowErr.message
-      });
+      if (NODE_ENV === 'development' && QSTASH_TOKEN === 'development') {
+        logger.debug('QStash offline/mock mode in development - subscription created successfully', {
+          subscriptionId: subscription.id,
+          reason: workflowErr.message
+        });
+      } else {
+        logger.warn('QStash workflow trigger warning (continuing creation)', {
+          error: workflowErr.message
+        });
+      }
     }
 
     return {
