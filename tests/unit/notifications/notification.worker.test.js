@@ -35,7 +35,10 @@ describe('NotificationWorker Unit Tests', () => {
       user: 'u1',
       deliveryStatus: NotificationDeliveryStatus.SCHEDULED
     });
-    jest.spyOn(notificationRepository, 'markProcessing').mockResolvedValue();
+    jest.spyOn(notificationRepository, 'markProcessing').mockResolvedValue({
+      _id: 'n1',
+      deliveryStatus: NotificationDeliveryStatus.PROCESSING
+    });
     jest.spyOn(userRepository, 'findByIdRaw').mockResolvedValue(null);
     jest.spyOn(notificationRepository, 'markFailed').mockResolvedValue();
 
@@ -52,7 +55,10 @@ describe('NotificationWorker Unit Tests', () => {
       body: 'Body',
       deliveryStatus: NotificationDeliveryStatus.SCHEDULED
     });
-    jest.spyOn(notificationRepository, 'markProcessing').mockResolvedValue();
+    jest.spyOn(notificationRepository, 'markProcessing').mockResolvedValue({
+      _id: 'n1',
+      deliveryStatus: NotificationDeliveryStatus.PROCESSING
+    });
     jest.spyOn(userRepository, 'findByIdRaw').mockResolvedValue({ email: 'user@example.com' });
     jest.spyOn(emailProvider, 'send').mockResolvedValue({ messageId: 'm123' });
     jest.spyOn(notificationRepository, 'markSent').mockResolvedValue();
@@ -68,7 +74,10 @@ describe('NotificationWorker Unit Tests', () => {
       channel: 'IN_APP',
       deliveryStatus: NotificationDeliveryStatus.SCHEDULED
     });
-    jest.spyOn(notificationRepository, 'markProcessing').mockResolvedValue();
+    jest.spyOn(notificationRepository, 'markProcessing').mockResolvedValue({
+      _id: 'n1',
+      deliveryStatus: NotificationDeliveryStatus.PROCESSING
+    });
     jest.spyOn(userRepository, 'findByIdRaw').mockResolvedValue({ email: 'user@example.com' });
     jest.spyOn(notificationRepository, 'markDelivered').mockResolvedValue();
 
@@ -85,7 +94,10 @@ describe('NotificationWorker Unit Tests', () => {
       maxRetries: 3,
       deliveryStatus: NotificationDeliveryStatus.SCHEDULED
     });
-    jest.spyOn(notificationRepository, 'markProcessing').mockResolvedValue();
+    jest.spyOn(notificationRepository, 'markProcessing').mockResolvedValue({
+      _id: 'n1',
+      deliveryStatus: NotificationDeliveryStatus.PROCESSING
+    });
     jest.spyOn(userRepository, 'findByIdRaw').mockResolvedValue({ email: 'user@example.com' });
     jest.spyOn(emailProvider, 'send').mockRejectedValue(new Error('Network error'));
     jest.spyOn(notificationRepository, 'markRetrying').mockResolvedValue();

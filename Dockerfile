@@ -42,9 +42,9 @@ COPY . .
 # Security hardening: Ensure non-root user execution
 USER node
 
-# Healthcheck probe targeting internal /health endpoint
+# Healthcheck probe targeting readiness endpoint (reflects dependency state)
 HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
-  CMD curl -f http://localhost:${PORT}/health || exit 1
+  CMD curl -f http://localhost:${PORT}/ready || exit 1
 
 EXPOSE 5500
 

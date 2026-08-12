@@ -10,7 +10,7 @@ import emailProvider from '../providers/email.provider.js';
 import NotificationDeliveryStatus from '../constants/notification-status.js';
 import FailureClassifier, { FailureType } from '../utils/failure-classifier.util.js';
 import auditService from '../../services/audit.service.js';
-import logger from '../../utils/logger.js';
+import BackoffUtil from '../utils/backoff.util.js';
 
 export class NotificationWorker {
   /**
@@ -34,15 +34,14 @@ export class NotificationWorker {
       notif.deliveryStatus !== NotificationDeliveryStatus.SCHEDULED &&
       notif.deliveryStatus !== NotificationDeliveryStatus.RETRYING
     ) {
-      logger.info('Notification skipped by worker: invalid status transition', {
-        id: notificationId,
-        status: notif.deliveryStatus
-      });
       return { skipped: true, status: notif.deliveryStatus };
     }
 
-    // Mark status PROCESSING
-    await notificationRepository.markProcessing(notificationId);
+    // Atomic CAS: claim notification for processing
+    const processingNotif = await notificationRepository.markProcessing(notificationId);
+    if (!processingNotif) {
+      return { skipped: true, reason: 'CAS_CONFLICT' };
+    }
 
     const user = await userRepository.findByIdRaw(notif.user);
     if (!user || !user.email) {
@@ -92,7 +91,9 @@ export class NotificationWorker {
         });
         return { success: false, failed: true, reason: err.message };
       } else {
-        await notificationRepository.markRetrying(notificationId, newRetryCount);
+        const backoffSeconds = BackoffUtil.getDelaySeconds(newRetryCount);
+        const scheduledFor = new Date(Date.now() + backoffSeconds * 1000);
+        await notificationRepository.markRetrying(notificationId, newRetryCount, scheduledFor);
         await auditService.logEvent({
           user: notif.user,
           eventType: 'NOTIFICATION_RETRIED',

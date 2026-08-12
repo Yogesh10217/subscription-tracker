@@ -39,6 +39,8 @@ export const errorMiddleware = (err, req, res, _next) => {
   res.status(statusCode).json({
     success: false,
     message,
+    requestId: req.id || null,
+    timestamp: new Date().toISOString(),
     ...(errors.length > 0 && { errors }),
     ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
   });

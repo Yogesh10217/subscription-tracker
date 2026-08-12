@@ -58,6 +58,10 @@ const notificationSchema = new mongoose.Schema(
       default: NotificationDeliveryStatus.PENDING,
       index: true
     },
+    processingStartedAt: {
+      type: Date,
+      default: null
+    },
     readAt: {
       type: Date,
       default: null,
@@ -123,6 +127,7 @@ notificationSchema.index({ user: 1, deliveryStatus: 1 });
 notificationSchema.index({ user: 1, readAt: 1 });
 notificationSchema.index({ user: 1, scheduledFor: 1 });
 notificationSchema.index({ deliveryStatus: 1, scheduledFor: 1 });
+notificationSchema.index({ deliveryStatus: 1, processingStartedAt: 1 });
 
 const Notification =
   mongoose.models.Notification || mongoose.model('Notification', notificationSchema);

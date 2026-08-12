@@ -40,3 +40,16 @@
   - Classifies delivery failures into `TRANSIENT` (exponential backoff retry: 1m, 5m, 15m, 30m, 60m) vs `PERMANENT`.
   - QStash worker endpoint signature verification guard.
 - **Consequences**: Production-ready, asynchronous, auditable, and idempotent notification platform.
+
+## ADR-007: Production Observability, Reliability & Operational Excellence (Phase 6)
+- **Status**: Approved & Executed (Phase 6)
+- **Context**: Need for production-grade diagnosability, structured logging, request tracing, graceful shutdown, atomic worker claiming, stale processing recovery, and Prometheus metrics.
+- **Decision**:
+  - Migrated logger to `pino` structured JSON with `AsyncLocalStorage` request context (`requestId`, `correlationId`, `userId`, `method`, `path`).
+  - Implemented centralized `shutdown.js` manager handling `SIGTERM`, `SIGINT`, `unhandledRejection`, and `uncaughtException` with orderly HTTP server close, in-flight connection draining, cron task cancellation, and MongoDB graceful teardown.
+  - Hardened health probes: `/health` returns 503 on DB disconnect; Docker `HEALTHCHECK` targets `/ready`.
+  - Implemented atomic Compare-And-Swap (CAS) worker claiming (`markProcessing`) and 15-minute stale `PROCESSING` recovery.
+  - Updated notification scheduler to drain `RETRYING` notifications with exponential backoff.
+  - Built lightweight in-process `MetricsRegistry` exposing `/metrics` in Prometheus text format.
+  - Enhanced environment validation with strict production checks.
+- **Consequences**: Platform is fully observable, diagnosable, fault-tolerant, and operationally safe without introducing third-party queue infrastructure or breaking backward compatibility.

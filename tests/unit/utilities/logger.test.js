@@ -5,7 +5,7 @@ import asyncHandler from '#utils/async-handler.js';
 
 describe('Utility Unit Tests', () => {
   test('logger should format and output logs without throwing', () => {
-    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const spy = jest.spyOn(logger, 'error');
     logger.error('Test log message', { key: 'val' }, 'req-123');
     expect(spy).toHaveBeenCalled();
     spy.mockRestore();

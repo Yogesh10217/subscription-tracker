@@ -4,11 +4,19 @@ import logger from '../utils/logger.js';
 
 let isConnected = false;
 
-export const connectToDatabase = async (maxRetries = 3, retryDelayMs = 2000) => {
+/**
+ * Connects to MongoDB with exponential backoff and jitter.
+ * @param {number} maxRetries - Maximum connection attempts
+ * @param {number} baseDelayMs - Base delay in milliseconds
+ * @returns {Promise<mongoose.Connection|null>}
+ */
+export const connectToDatabase = async (maxRetries = 3, baseDelayMs = 1000) => {
   if (isConnected) {
     logger.info('Using existing database connection');
     return;
   }
+
+  const MAX_DELAY_MS = 30000;
 
   let attempts = 0;
   while (attempts < maxRetries) {
@@ -39,14 +47,25 @@ export const connectToDatabase = async (maxRetries = 3, retryDelayMs = 2000) => 
         `MongoDB connection failed (Attempt ${attempts}/${maxRetries}): ${error.message}`
       );
       if (attempts >= maxRetries) {
-        logger.error('Max database connection retries reached. Continuing in offline/demo mode...');
+        logger.error(
+          'MongoDB connection failed after all retries. Application may not function correctly.',
+          { maxRetries, lastError: error.message }
+        );
         return null;
       }
-      await new Promise((res) => setTimeout(res, retryDelayMs));
+      // Exponential backoff with jitter: min(baseDelay * 2^attempt + jitter, maxDelay)
+      const exponentialDelay = baseDelayMs * Math.pow(2, attempts - 1);
+      const jitter = Math.floor(Math.random() * 1000);
+      const delay = Math.min(exponentialDelay + jitter, MAX_DELAY_MS);
+      logger.info(`Retrying MongoDB connection in ${delay}ms...`, { delay, attempt: attempts });
+      await new Promise((res) => setTimeout(res, delay));
     }
   }
 };
 
+/**
+ * Closes the MongoDB connection gracefully.
+ */
 export const closeDatabaseConnection = async () => {
   if (isConnected) {
     await mongoose.connection.close();
@@ -55,16 +74,10 @@ export const closeDatabaseConnection = async () => {
   }
 };
 
-process.on('SIGINT', async () => {
-  logger.info('SIGINT received. Closing database connection...');
-  await closeDatabaseConnection();
-  process.exit(0);
-});
-
-process.on('SIGTERM', async () => {
-  logger.info('SIGTERM received. Closing database connection...');
-  await closeDatabaseConnection();
-  process.exit(0);
-});
+/**
+ * Returns whether the database is currently connected.
+ * @returns {boolean}
+ */
+export const isDatabaseConnected = () => isConnected;
 
 export default connectToDatabase;
