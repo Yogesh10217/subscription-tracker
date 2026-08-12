@@ -48,8 +48,8 @@ export class NotificationWorker {
       const reason = 'Recipient user email missing or deleted';
       await notificationRepository.markFailed(notificationId, reason);
       await auditService.logEvent({
-        user: notif.user,
-        eventType: 'NOTIFICATION_FAILED',
+        action: 'NOTIFICATION_FAILED',
+        actor: notif.user,
         metadata: { notificationId, reason }
       });
       return { success: false, reason };
@@ -67,8 +67,8 @@ export class NotificationWorker {
         await notificationRepository.markSent(notificationId, result.messageId);
 
         await auditService.logEvent({
-          user: notif.user,
-          eventType: 'NOTIFICATION_SENT',
+          action: 'NOTIFICATION_SENT',
+          actor: notif.user,
           metadata: { notificationId, messageId: result.messageId, channel: 'EMAIL' }
         });
 
@@ -85,8 +85,8 @@ export class NotificationWorker {
       if (failureType === FailureType.PERMANENT || newRetryCount > (notif.maxRetries || 5)) {
         await notificationRepository.markFailed(notificationId, err.message);
         await auditService.logEvent({
-          user: notif.user,
-          eventType: 'NOTIFICATION_FAILED',
+          action: 'NOTIFICATION_FAILED',
+          actor: notif.user,
           metadata: { notificationId, reason: err.message, retryCount: newRetryCount }
         });
         return { success: false, failed: true, reason: err.message };
@@ -95,8 +95,8 @@ export class NotificationWorker {
         const scheduledFor = new Date(Date.now() + backoffSeconds * 1000);
         await notificationRepository.markRetrying(notificationId, newRetryCount, scheduledFor);
         await auditService.logEvent({
-          user: notif.user,
-          eventType: 'NOTIFICATION_RETRIED',
+          action: 'NOTIFICATION_RETRIED',
+          actor: notif.user,
           metadata: { notificationId, retryCount: newRetryCount, error: err.message }
         });
         return { success: false, retrying: true, retryCount: newRetryCount };

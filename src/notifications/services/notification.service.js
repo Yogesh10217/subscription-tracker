@@ -30,8 +30,8 @@ export const notificationService = {
     }
 
     await auditService.logEvent({
-      user: userId,
-      eventType: 'NOTIFICATION_READ',
+      action: 'NOTIFICATION_READ',
+      actor: userId,
       metadata: { notificationId }
     });
 
