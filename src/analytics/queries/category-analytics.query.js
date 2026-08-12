@@ -12,7 +12,7 @@ export const categoryAnalyticsQuery = {
     const matchFilter = context.getBaseSubscriptionMatch();
     const subscriptions = await Subscription.find({
       ...matchFilter,
-      status: { $in: ['Active', 'Trial'] }
+      status: { $in: ['Active', 'Trial', 'Expired', 'expired'] }
     }).lean();
 
     const categoriesByCurrency = {};

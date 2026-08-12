@@ -29,6 +29,7 @@ export const modalsComponent = {
       subscriptionModal: document.getElementById('subscriptionModal'),
       closeModalBtn: document.getElementById('closeModalBtn'),
       cancelModalBtn: document.getElementById('cancelModalBtn'),
+      saveSubBtn: document.getElementById('saveSubBtn'),
       subscriptionForm: document.getElementById('subscriptionForm'),
       modalTitle: document.getElementById('modalTitle'),
       subId: document.getElementById('subId'),
@@ -61,6 +62,26 @@ export const modalsComponent = {
     // Auto calculate renewal
     if (this.elements.subStartDate) this.elements.subStartDate.addEventListener('change', () => this.autoCalculateRenewalDate());
     if (this.elements.subFrequency) this.elements.subFrequency.addEventListener('change', () => this.autoCalculateRenewalDate());
+
+    // Backdrop click close UX
+    if (this.elements.subscriptionModal) {
+      this.elements.subscriptionModal.addEventListener('click', (e) => {
+        if (e.target === this.elements.subscriptionModal) this.closeSubModal();
+      });
+    }
+    if (this.elements.authModal) {
+      this.elements.authModal.addEventListener('click', (e) => {
+        if (e.target === this.elements.authModal) this.closeAuthModal();
+      });
+    }
+
+    // Escape key close UX
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        this.closeSubModal();
+        this.closeAuthModal();
+      }
+    });
   },
 
   // --- Auth Modal ---
@@ -113,7 +134,9 @@ export const modalsComponent = {
       this.closeAuthModal();
       domUtils.showToast('Successfully authenticated', 'success');
       // Trigger a global reload after auth changes
-      window.dispatchEvent(new CustomEvent('subpulse:auth-success'));
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('subpulse:auth-success'));
+      }
     } catch (err) {
       if (err.name !== 'AbortError') {
         if (this.elements.authError) {
@@ -202,6 +225,11 @@ export const modalsComponent = {
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
 
+    if (this.elements.saveSubBtn) {
+      this.elements.saveSubBtn.disabled = true;
+      this.elements.saveSubBtn.textContent = 'Saving...';
+    }
+
     try {
       if (id) {
         await subscriptionsApi.update(id, payload, this.abortController.signal);
@@ -218,6 +246,11 @@ export const modalsComponent = {
     } catch (err) {
       if (err.name !== 'AbortError') {
         domUtils.showToast(`Error: ${err.message}`, 'error');
+      }
+    } finally {
+      if (this.elements.saveSubBtn) {
+        this.elements.saveSubBtn.disabled = false;
+        this.elements.saveSubBtn.textContent = 'Save Subscription';
       }
     }
   },

@@ -112,9 +112,9 @@ export const subscriptionListComponent = {
 
       const response = await subscriptionsApi.getAll(params, this.abortController.signal);
       
-      // The backend returns an array if NO params are provided, or { subscriptions, pagination } if ANY params are provided.
-      // Since we always send at least 'limit' and 'sortBy', we will get the object format.
-      this.subscriptions = response.subscriptions || response || [];
+      this.subscriptions = Array.isArray(response) 
+        ? response 
+        : (response?.subscriptions || response?.items || []);
       
       this.render();
       if (this.onSubscriptionsChanged) this.onSubscriptionsChanged();
@@ -122,7 +122,7 @@ export const subscriptionListComponent = {
       if (error.name !== 'AbortError') {
         console.error('Failed to load subscriptions:', error);
         domUtils.showToast('Failed to load subscriptions', 'error');
-        if (this.elements.grid) this.elements.grid.innerHTML = '<div class="text-error">Error loading data</div>';
+        if (this.elements.grid) this.elements.grid.innerHTML = '<div class="text-error">Error loading subscriptions</div>';
       }
     }
   },

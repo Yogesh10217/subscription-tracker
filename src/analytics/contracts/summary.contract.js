@@ -14,7 +14,8 @@ export const formatSummaryContract = (data = {}) => {
       renewals: {
         upcoming7DaysCount: data.renewalAnalytics?.upcoming7DaysCount || 0,
         upcoming30DaysCount: data.renewalAnalytics?.upcoming30DaysCount || 0,
-        upcoming30DaysCostsByCurrency: data.renewalAnalytics?.upcoming30DaysCostsByCurrency || {}
+        upcoming30DaysCostsByCurrency: data.renewalAnalytics?.upcoming30DaysCostsByCurrency || {},
+        upcomingSubscriptions: data.renewalAnalytics?.upcomingSubscriptions || []
       },
       trials: {
         activeTrialsCount: data.trialAnalytics?.activeTrialsCount || 0,

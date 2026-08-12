@@ -63,38 +63,67 @@ export const dashboardComponent = {
     const metrics = summary.metrics;
     
     // Rendering Subscriptions Count
-    const active = metrics.subscriptions.activeCount || 0;
-    const expired = metrics.subscriptions.expiredCount || 0;
+    const subs = metrics.subscriptions || {};
+    const active = subs.Active !== undefined ? subs.Active : (subs.activeCount !== undefined ? subs.activeCount : (subs.total || 0));
+    const expired = (subs.Expired || 0) + (subs.expired || 0) + (subs.Cancelled || 0) + (subs.expiredCount || 0);
+
     if (this.elements.activeCount) this.elements.activeCount.textContent = active;
     if (this.elements.expiredCount) this.elements.expiredCount.textContent = `${expired} expired / cancelled`;
     if (this.elements.monthlySubCount) this.elements.monthlySubCount.textContent = `${active} active recurring items`;
 
-    // Multi-currency handling: Never add them. Render each currency block.
-    // The backend provides projectedSpendByCurrency -> { monthly: { USD: 10, INR: 50 }, yearly: { USD: 120, INR: 600 } }
-    // Wait, let's assume it provides monthly/yearly, or just a flat object.
-    // If it's a flat object { USD: 100, INR: 5000 } for projectedSpendByCurrency...
-    // Actually we need to check the backend structure if possible, but let's render dynamically based on keys.
-    const renderMultiCurrency = (currencyObj) => {
-      if (!currencyObj || Object.keys(currencyObj).length === 0) {
-        return `<div>$0.00</div>`; // Fallback
+    // Multi-currency handling for Monthly and Yearly projected spend
+    const spendObj = metrics.projectedSpend || {};
+
+    const renderMonthlyCurrency = (currencyMap) => {
+      if (!currencyMap || Object.keys(currencyMap).length === 0) {
+        return `<div>$0.00</div>`;
       }
-      return Object.entries(currencyObj)
-        .map(([curr, amt]) => `<div>${currencyUtils.format(amt, curr)}</div>`)
+      return Object.entries(currencyMap)
+        .map(([curr, val]) => {
+          const amt = typeof val === 'number' ? val : (val.projectedMonthlySpend || val.monthly || 0);
+          return `<div>${currencyUtils.format(amt, curr)}</div>`;
+        })
         .join('');
     };
 
-    // If projectedSpend is structured { monthly: { USD: 10 }, yearly: { USD: 120 } }
-    const projectedMonthly = metrics.projectedSpend?.monthly || metrics.projectedSpend || {};
-    const projectedYearly = metrics.projectedSpend?.yearly || {};
-    // If it's flat we will just use projectedSpend and assume it's monthly, then we don't have yearly.
-    // The backend contract says projectedSpend: data.spendingAnalytics?.projectedSpendByCurrency || {}
-    
+    const renderYearlyCurrency = (currencyMap) => {
+      if (!currencyMap || Object.keys(currencyMap).length === 0) {
+        return `<div>$0.00</div>`;
+      }
+      return Object.entries(currencyMap)
+        .map(([curr, val]) => {
+          const amt = typeof val === 'number' ? val : (val.projectedYearlySpend || val.yearly || 0);
+          return `<div>${currencyUtils.format(amt, curr)}</div>`;
+        })
+        .join('');
+    };
+
     if (this.elements.totalMonthlyCost) {
-      this.elements.totalMonthlyCost.innerHTML = renderMultiCurrency(projectedMonthly);
+      this.elements.totalMonthlyCost.innerHTML = renderMonthlyCurrency(spendObj);
     }
     
     if (this.elements.totalYearlyCost) {
-      this.elements.totalYearlyCost.innerHTML = renderMultiCurrency(projectedYearly);
+      this.elements.totalYearlyCost.innerHTML = renderYearlyCurrency(spendObj);
+    }
+
+    // Next Renewal Handling
+    const upcomingList = metrics.renewals?.upcomingSubscriptions || [];
+    if (upcomingList.length > 0) {
+      const nextSub = upcomingList[0];
+      const renewalDateObj = new Date(nextSub.renewalDate);
+      const daysLeft = Math.max(0, Math.ceil((renewalDateObj - new Date()) / (1000 * 60 * 60 * 24)));
+
+      if (this.elements.nextRenewalName) this.elements.nextRenewalName.textContent = nextSub.name;
+      if (this.elements.nextRenewalDate) {
+        this.elements.nextRenewalDate.textContent = `${currencyUtils.format(nextSub.price, nextSub.currency)} on ${renewalDateObj.toLocaleDateString()}`;
+      }
+      if (this.elements.nextRenewalCountdown) {
+        this.elements.nextRenewalCountdown.textContent = `${daysLeft} days left`;
+      }
+    } else {
+      if (this.elements.nextRenewalName) this.elements.nextRenewalName.textContent = 'None';
+      if (this.elements.nextRenewalDate) this.elements.nextRenewalDate.textContent = 'No upcoming renewals';
+      if (this.elements.nextRenewalCountdown) this.elements.nextRenewalCountdown.textContent = '-- days left';
     }
 
     // Categories
@@ -104,8 +133,21 @@ export const dashboardComponent = {
   renderCategoryBars(categoryData, selectedCurrency) {
     if (!this.elements.categoryBars) return;
 
-    const targetData = categoryData[selectedCurrency] || [];
-    if (targetData.length === 0) {
+    const availableCurrencies = categoryData ? Object.keys(categoryData) : [];
+    const targetCurrency = (categoryData && categoryData[selectedCurrency])
+      ? selectedCurrency
+      : (availableCurrencies.length > 0 ? availableCurrencies[0] : selectedCurrency);
+
+    const rawGroup = categoryData ? categoryData[targetCurrency] : null;
+    let targetData = [];
+
+    if (Array.isArray(rawGroup)) {
+      targetData = rawGroup;
+    } else if (rawGroup && Array.isArray(rawGroup.categories)) {
+      targetData = rawGroup.categories;
+    }
+
+    if (!targetData || targetData.length === 0) {
       this.elements.categoryBars.innerHTML = `<div class="text-muted" style="font-size:0.85rem;">No active category spending data</div>`;
       if (this.elements.categoryCountDetails) this.elements.categoryCountDetails.textContent = '0 categories active';
       return;
@@ -123,10 +165,9 @@ export const dashboardComponent = {
       Other: 'var(--accent-pink)'
     };
 
-    // Assuming targetData is an array of { category: 'Name', spend: 50, percentage: 25 }
     this.elements.categoryBars.innerHTML = targetData.map(item => {
-      const cat = domUtils.escapeHTML(item.category || 'Other');
-      const amt = item.spend || 0;
+      const cat = domUtils.escapeHTML(item.name || item.category || 'Other');
+      const amt = item.monthlySpend !== undefined ? item.monthlySpend : (item.spend || 0);
       const pct = item.percentage || 0;
       const color = categoryColors[cat] || categoryColors.Other;
 

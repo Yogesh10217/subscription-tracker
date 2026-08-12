@@ -118,8 +118,11 @@ class App {
   }
 
   async onDataMutated() {
-    // When a subscription is added/edited/deleted, we need to reload the dashboard to get new analytics
-    await dashboardComponent.load(this.currency);
+    // When a subscription is added/edited/deleted, reload both dashboard analytics and subscription list
+    await Promise.all([
+      dashboardComponent.load(this.currency),
+      subscriptionListComponent.load()
+    ]);
   }
 
   setSystemStatus(connected, text) {

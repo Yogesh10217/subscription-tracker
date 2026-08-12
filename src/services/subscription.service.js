@@ -1,7 +1,7 @@
 import subscriptionRepository from '../repositories/subscription.repository.js';
 import timelineService from './timeline.service.js';
-import workflowClient from '../config/upstash.js';
-import { SERVER_URL, NODE_ENV, QSTASH_TOKEN } from '../config/env.js';
+import { triggerWorkflowSafely } from '../config/upstash.js';
+import { SERVER_URL } from '../config/env.js';
 import ApiError from '../utils/api-error.js';
 import logger from '../utils/logger.js';
 
@@ -24,44 +24,25 @@ export class SubscriptionService {
     let qstashResponse = null;
     let workflowId = null;
 
-    try {
-      if (workflowClient && SERVER_URL) {
-        const webhookUrl = `${SERVER_URL}/api/v1/workflows/subscription/reminder`;
-        logger.info('Triggering QStash workflow for subscription', {
-          subscriptionId: subscription.id,
-          webhookUrl
-        });
+    if (SERVER_URL) {
+      const webhookUrl = `${SERVER_URL}/api/v1/workflows/subscription/reminder`;
+      logger.info('Triggering QStash workflow for subscription', {
+        subscriptionId: subscription.id,
+        webhookUrl
+      });
 
-        qstashResponse = await workflowClient.trigger({
-          url: webhookUrl,
-          body: {
-            subscriptionId: subscription.id,
-            userId
-          },
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          retries: 3,
-          cron: '0 12 * * *'
-        });
-
-        workflowId = qstashResponse?.scheduleId || qstashResponse?.messageId || qstashResponse?.id;
-      }
-    } catch (workflowErr) {
-      if (
-        NODE_ENV === 'development' ||
-        workflowErr.message?.includes('fetch failed') ||
-        workflowErr.message?.includes('ECONNREFUSED')
-      ) {
-        logger.info('QStash server offline/unreachable (subscription created successfully)', {
+      const qstashResult = await triggerWorkflowSafely({
+        url: webhookUrl,
+        body: {
           subscriptionId: subscription.id,
-          reason: workflowErr.message
-        });
-      } else {
-        logger.warn('QStash workflow trigger warning (continuing creation)', {
-          error: workflowErr.message
-        });
-      }
+          userId
+        },
+        cron: '0 12 * * *',
+        retries: 3
+      });
+
+      workflowId = qstashResult.workflowId || null;
+      qstashResponse = qstashResult.response || null;
     }
 
     return {

@@ -36,7 +36,7 @@ export const notificationCenterComponent = {
   async fetchUnreadCount() {
     try {
       const data = await notificationsApi.getUnreadCount();
-      const count = data?.count || 0;
+      const count = data?.unreadCount !== undefined ? data.unreadCount : (data?.count || 0);
       this.updateBadge(count);
     } catch (e) {
       console.warn('Failed to fetch unread count', e);
@@ -80,7 +80,8 @@ export const notificationCenterComponent = {
 
     try {
       this.renderLoading();
-      this.notifications = await notificationsApi.getAll({}, this.abortController.signal);
+      const res = await notificationsApi.getAll({}, this.abortController.signal);
+      this.notifications = Array.isArray(res) ? res : (res?.items || []);
       this.renderList();
     } catch (error) {
       if (error.name !== 'AbortError') {
