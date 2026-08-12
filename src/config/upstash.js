@@ -19,11 +19,11 @@ logger.info('QStash Configuration Initialized', {
 export function isQStashConfigured() {
   return Boolean(
     QSTASH_TOKEN &&
-      QSTASH_TOKEN !== 'development' &&
-      QSTASH_TOKEN !== 'mock_qstash_token' &&
-      QSTASH_URL &&
-      !QSTASH_URL.includes('127.0.0.1') &&
-      !QSTASH_URL.includes('localhost')
+    QSTASH_TOKEN !== 'development' &&
+    QSTASH_TOKEN !== 'mock_qstash_token' &&
+    QSTASH_URL &&
+    !QSTASH_URL.includes('127.0.0.1') &&
+    !QSTASH_URL.includes('localhost')
   );
 }
 
@@ -82,4 +82,3 @@ export async function triggerWorkflowSafely({ url, body, cron, retries = 3 }) {
 }
 
 export default workflowClient;
-

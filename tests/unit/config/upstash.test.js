@@ -31,5 +31,3 @@ describe('Upstash Config Unit Tests', () => {
     expect(workflowClient.trigger).toBeDefined();
   });
 });
-
-
