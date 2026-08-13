@@ -99,12 +99,22 @@ describe('All Validators Unit Tests', () => {
     expect(next).toHaveBeenCalledWith(expect.any(ApiError));
 
     next.mockClear();
+    req.body = { currentPassword: 'OldPass123!', newPassword: 'short' };
+    validateChangePassword(req, res, next);
+    expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+
+    next.mockClear();
     req.body = { currentPassword: 'OldPass123!', newPassword: 'NewPass123!' };
     validateChangePassword(req, res, next);
     expect(next).toHaveBeenCalledWith();
   });
 
   test('validateResetPassword', () => {
+    validateResetPassword(req, res, next);
+    expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+
+    next.mockClear();
+    req.body = { token: 'tok123', newPassword: 'short' };
     validateResetPassword(req, res, next);
     expect(next).toHaveBeenCalledWith(expect.any(ApiError));
 
