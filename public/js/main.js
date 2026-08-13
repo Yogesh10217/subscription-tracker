@@ -4,8 +4,8 @@ import { subscriptionListComponent } from './components/subscriptionList.compone
 import { notificationCenterComponent } from './components/notificationCenter.component.js';
 import { preferencesModalComponent } from './components/preferencesModal.component.js';
 import { modalsComponent } from './components/modals.component.js';
-import { authApi } from './api/auth.api.js';
 import { subscriptionsApi } from './api/subscriptions.api.js';
+import { apiClient } from './api/apiClient.js';
 import { domUtils } from './utils/dom.util.js';
 
 class App {
@@ -26,7 +26,13 @@ class App {
     // Subscribe to auth changes
     authState.subscribe((user, isAuthenticated) => this.onAuthStateChanged(user, isAuthenticated));
 
-    // Try to load initial data
+    // Try silent token refresh on app startup using httpOnly cookie
+    try {
+      await apiClient.executeRefresh();
+    } catch (_err) {
+      // Non-fatal silent refresh failure for unauthenticated visitors
+    }
+
     if (authState.isAuthenticated()) {
       await this.loadApplicationData();
     } else {

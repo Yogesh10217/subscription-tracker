@@ -9,7 +9,7 @@ class ApiClient {
   }
 
   /**
-   * Main fetch wrapper with support for AbortSignal
+   * Main fetch wrapper with support for AbortSignal and cookie credentials
    * @param {string} endpoint - e.g. '/subscriptions'
    * @param {Object} options - fetch options (method, body, signal, etc.)
    * @param {boolean} _retry - Internal flag to prevent infinite loops
@@ -29,6 +29,7 @@ class ApiClient {
     }
 
     const fetchOptions = {
+      credentials: 'same-origin',
       ...options,
       headers
     };
@@ -104,9 +105,10 @@ class ApiClient {
 
   async executeRefresh() {
     try {
-      // POST to refresh. Credentials 'include' ensures the httpOnly refreshToken cookie is sent.
+      // POST to refresh. credentials: 'same-origin' ensures the httpOnly refreshToken cookie is sent.
       const res = await fetch(`${API_BASE}/auth/refresh`, {
         method: 'POST',
+        credentials: 'same-origin',
         headers: {
           'Content-Type': 'application/json'
         }
@@ -117,7 +119,7 @@ class ApiClient {
       }
 
       const data = await res.json();
-      const newAccessToken = data.data.accessToken;
+      const newAccessToken = data.data?.accessToken || data.accessToken;
       
       // 4. Store newly returned access token in memory
       authState.setToken(newAccessToken);
@@ -130,7 +132,6 @@ class ApiClient {
 
   handleAuthFailure() {
     authState.clear();
-    // In a real app, we might emit an event here to trigger the UI to show the login modal
     window.dispatchEvent(new CustomEvent('subpulse:auth-failure'));
   }
 

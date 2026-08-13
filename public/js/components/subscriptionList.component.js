@@ -155,7 +155,7 @@ export const subscriptionListComponent = {
 
     this.elements.grid.innerHTML = filtered.map(sub => {
       const formattedPrice = currencyUtils.format(sub.price, sub.currency);
-      const initials = (sub.name || 'Sub').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+      const initials = (sub.name || 'Sub').split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase();
       
       const statusClass = sub.status === 'Active' ? 'active-pill' : (sub.status === 'expired' ? 'expired-pill' : 'cancelled-pill');
       
