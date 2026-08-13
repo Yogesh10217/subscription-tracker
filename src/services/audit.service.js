@@ -29,8 +29,7 @@ export const auditService = {
     metadata = {}
   } = {}) {
     const finalAction = action || eventType || 'SYSTEM_EVENT';
-    const rawActor = actor || user || null;
-    const finalActor = rawActor && mongoose.Types.ObjectId.isValid(rawActor) ? rawActor : null;
+    const finalActor = actor || user || null;
 
     logger.info(
       `[AUDIT] ${finalAction} - ${result}`,
@@ -38,8 +37,8 @@ export const auditService = {
       correlationId
     );
 
-    // If database is not connected (e.g. in test or disconnected state), skip Mongoose buffering write
-    if (mongoose.connection.readyState !== 1) {
+    // Skip Mongoose write if MongoDB is disconnected and not in test environment
+    if (mongoose.connection.readyState !== 1 && process.env.NODE_ENV !== 'test') {
       return null;
     }
 

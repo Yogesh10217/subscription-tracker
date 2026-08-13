@@ -56,11 +56,7 @@ export const logout = asyncHandler(async (req, res) => {
   const token = req.body.refreshToken || req.cookies?.refreshToken;
   if (token) {
     const hash = sessionService.hashToken(token);
-    await sessionService.revokeSession(
-      hash,
-      req.user?._id?.toString(),
-      'User Logout'
-    );
+    await sessionService.revokeSession(hash, req.user?._id?.toString(), 'User Logout');
   }
 
   res.clearCookie('refreshToken', { path: '/api/v1/auth' });

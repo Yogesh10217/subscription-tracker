@@ -14,8 +14,7 @@ export class SubscriptionRepository {
   }
 
   async findById(id) {
-    return Subscription.findOne({ _id: id, isDeleted: false })
-      .populate(STANDARD_POPULATES);
+    return Subscription.findOne({ _id: id, isDeleted: false }).populate(STANDARD_POPULATES);
   }
 
   async findByIdWithUser(id) {
@@ -53,8 +52,7 @@ export class SubscriptionRepository {
     return Subscription.findOneAndUpdate({ _id: id, isDeleted: false }, updateData, {
       new: true,
       runValidators: true
-    })
-      .populate(STANDARD_POPULATES);
+    }).populate(STANDARD_POPULATES);
   }
 
   async softDelete(id, userId) {
