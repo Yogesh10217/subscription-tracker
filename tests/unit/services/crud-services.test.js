@@ -17,6 +17,7 @@ import exportService from '#services/export.service.js';
 import searchService from '#services/search.service.js';
 import emailService from '#services/email.service.js';
 import subscriptionRepository from '#repositories/subscription.repository.js';
+import generateSlug from '#utils/slug.utils.js';
 import ApiError from '#utils/api-error.js';
 
 describe('Domain CRUD Services Unit Tests', () => {
@@ -274,6 +275,15 @@ describe('Domain CRUD Services Unit Tests', () => {
       const res = await searchService.searchSubscriptions({ page: 1, limit: 10 }, 'u1');
       expect(res.pagination.total).toBe(1);
       expect(res.pagination.hasNextPage).toBe(false);
+
+      jest.spyOn(subscriptionRepository, 'findWithQuery').mockResolvedValue({
+        items: [],
+        total: 0
+      });
+      const zeroRes = await searchService.searchSubscriptions({ page: 1, limit: 10 }, 'u1');
+      expect(zeroRes.pagination.totalPages).toBe(1);
+
+      expect(generateSlug()).toBe('');
     });
 
     test('emailService delegates to sendReminder', async () => {

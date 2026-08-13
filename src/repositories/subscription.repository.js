@@ -31,9 +31,7 @@ export class SubscriptionRepository {
 
   async findAll(filter = {}) {
     const finalFilter = { isDeleted: false, ...filter };
-    return Subscription.find(finalFilter)
-      .populate(STANDARD_POPULATES)
-      .sort({ createdAt: -1 });
+    return Subscription.find(finalFilter).populate(STANDARD_POPULATES).sort({ createdAt: -1 });
   }
 
   async findWithQuery(filter = {}, sort = { createdAt: -1 }, skip = 0, limit = 10) {

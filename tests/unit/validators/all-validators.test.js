@@ -191,6 +191,11 @@ describe('All Validators Unit Tests', () => {
     expect(next).toHaveBeenCalledWith(expect.any(ApiError));
 
     next.mockClear();
+    req.query = { granularity: 'invalid_granularity' };
+    validateAnalyticsQuery(req, res, next);
+    expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+
+    next.mockClear();
     req.query = { period: 'this_month', granularity: 'day', currency: 'USD' };
     validateAnalyticsQuery(req, res, next);
     expect(next).toHaveBeenCalledWith();

@@ -2,6 +2,7 @@ import { jest } from '@jest/globals';
 import analyticsService from '#analytics/analytics.service.js';
 import AnalyticsQueryContext from '#analytics/context/analytics-query-context.js';
 import Subscription from '#models/subscription.model.js';
+import TimelineEvent from '#models/timeline-event.model.js';
 
 describe('AnalyticsService Unit Tests', () => {
   const dummyContext = new AnalyticsQueryContext({ userId: '507f1f77bcf86cd799439011' });
@@ -16,6 +17,8 @@ describe('AnalyticsService Unit Tests', () => {
           currency: 'USD',
           frequency: 'Monthly',
           category: 'Entertainment',
+          categoryRef: { _id: 'cat1', name: 'Entertainment' },
+          provider: { _id: 'prov1', name: 'Netflix Inc' },
           status: 'Active',
           startDate: new Date('2026-01-01'),
           renewalDate: new Date('2026-09-01'),
@@ -25,11 +28,20 @@ describe('AnalyticsService Unit Tests', () => {
           isDeleted: false
         }
       ]),
+      populate: jest.fn().mockReturnThis(),
+      sort: jest.fn().mockReturnThis()
+    };
+
+    const mockTimelineChain = {
+      lean: jest.fn().mockResolvedValue([]),
       sort: jest.fn().mockReturnThis()
     };
 
     jest.spyOn(Subscription, 'find').mockReturnValue(mockQueryChain);
     jest.spyOn(Subscription, 'aggregate').mockResolvedValue([]);
+    jest.spyOn(Subscription, 'countDocuments').mockResolvedValue(1);
+    jest.spyOn(TimelineEvent, 'find').mockReturnValue(mockTimelineChain);
+    jest.spyOn(TimelineEvent, 'countDocuments').mockResolvedValue(0);
   });
 
   afterEach(() => {

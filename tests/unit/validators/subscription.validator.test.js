@@ -16,6 +16,19 @@ describe('SubscriptionValidator Unit Tests', () => {
     expect(next).toHaveBeenCalledWith(expect.anything());
   });
 
+  test('validateCreateSubscription should reject invalid name length and invalid frequency', () => {
+    req.body = {
+      name: 'A',
+      price: 10,
+      category: 'Entertainment',
+      frequency: 'InvalidFreq',
+      paymentMethod: 'Credit Card',
+      startDate: '2026-01-01'
+    };
+    validateCreateSubscription(req, res, next);
+    expect(next).toHaveBeenCalledWith(expect.anything());
+  });
+
   test('validateCreateSubscription should pass valid payload', () => {
     req.body = {
       name: 'Netflix',

@@ -81,17 +81,26 @@ describe('Email & Utility & Constants Unit Tests', () => {
     expect(ApiError.internal().statusCode).toBe(500);
   });
 
-  test('ApiResponse created and error methods', () => {
+  test('ApiResponse created and error methods with default fallbacks', () => {
     const res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn().mockReturnThis()
     };
+
+    ApiResponse.success(res, { id: 1 });
+    expect(res.status).toHaveBeenCalledWith(200);
 
     ApiResponse.created(res, { id: 1 });
     expect(res.status).toHaveBeenCalledWith(201);
 
     ApiResponse.error(res, 'Failed', 400, ['err1']);
     expect(res.status).toHaveBeenCalledWith(400);
+
+    ApiResponse.error(res);
+    expect(res.status).toHaveBeenCalledWith(400);
+
+    const instance = new ApiResponse(200, { ok: true });
+    expect(instance.message).toBe('Success');
   });
 
   test('Constants definitions', () => {
