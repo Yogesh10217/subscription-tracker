@@ -1,7 +1,7 @@
 /**
  * @file audit.service.js
  * @module services/audit.service
- * @description Decoupled security audit logging service.
+ * @description Decoupled security audit logging service with non-blocking error handling.
  */
 
 import mongoose from 'mongoose';
@@ -12,17 +12,8 @@ export const auditService = {
   /**
    * Records a security audit log entry.
    * Parameter normalization handles action/eventType and actor/user synonyms.
+   * Never throws or blocks main execution thread if database is disconnected or buffering times out.
    * @param {Object} params
-   * @param {string} [params.action] - Event action (e.g. LOGIN_SUCCESS, ACCOUNT_LOCKED)
-   * @param {string} [params.eventType] - Synonym for action
-   * @param {string} [params.actor] - User ID who performed action
-   * @param {string} [params.user] - Synonym for actor
-   * @param {string} [params.target] - Target resource or user ID
-   * @param {string} [params.ipAddress='127.0.0.1']
-   * @param {string} [params.userAgent='Unknown']
-   * @param {string} [params.correlationId] - Request ID
-   * @param {string} [params.result='SUCCESS'] - SUCCESS | FAILURE | DENIED
-   * @param {Object} [params.metadata={}]
    * @returns {Promise<Object|null>}
    */
   async logEvent({
@@ -36,29 +27,41 @@ export const auditService = {
     correlationId = null,
     result = 'SUCCESS',
     metadata = {}
-  }) {
+  } = {}) {
     const finalAction = action || eventType || 'SYSTEM_EVENT';
     const rawActor = actor || user || null;
     const finalActor = rawActor && mongoose.Types.ObjectId.isValid(rawActor) ? rawActor : null;
 
-    try {
-      const logEntry = await securityRepository.createAuditLog({
-        action: finalAction,
-        actor: finalActor,
-        target,
-        ipAddress,
-        userAgent,
-        correlationId,
-        result,
-        metadata,
-        timestamp: new Date()
-      });
+    logger.info(
+      `[AUDIT] ${finalAction} - ${result}`,
+      { actor: finalActor, target, ipAddress },
+      correlationId
+    );
 
-      logger.info(
-        `[AUDIT] ${finalAction} - ${result}`,
-        { actor: finalActor, target, ipAddress },
-        correlationId
-      );
+    // If database is not connected (e.g. in test or disconnected state), skip Mongoose buffering write
+    if (mongoose.connection.readyState !== 1) {
+      return null;
+    }
+
+    try {
+      // Non-blocking timeout wrapper to ensure audit logs never block main application thread
+      const logEntry = await Promise.race([
+        securityRepository.createAuditLog({
+          action: finalAction,
+          actor: finalActor,
+          target,
+          ipAddress,
+          userAgent,
+          correlationId,
+          result,
+          metadata,
+          timestamp: new Date()
+        }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Audit log write timeout')), 3000)
+        )
+      ]);
+
       return logEntry;
     } catch (error) {
       logger.error('Failed to persist audit log', { error: error.message }, correlationId);

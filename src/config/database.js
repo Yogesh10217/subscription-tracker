@@ -5,6 +5,22 @@ import logger from '../utils/logger.js';
 let isConnected = false;
 
 /**
+ * Ensures auditlogs collection has proper indexes for query performance.
+ */
+async function ensureAuditLogsCollection() {
+  try {
+    const db = mongoose.connection.db;
+    if (db) {
+      const collection = db.collection('auditlogs');
+      await collection.createIndex({ timestamp: -1 });
+      await collection.createIndex({ actor: 1 });
+    }
+  } catch (error) {
+    logger.warn('Failed to ensure auditlogs collection indexes', { error: error.message });
+  }
+}
+
+/**
  * Connects to MongoDB with exponential backoff and jitter.
  * @param {number} maxRetries - Maximum connection attempts
  * @param {number} baseDelayMs - Base delay in milliseconds
@@ -25,11 +41,18 @@ export const connectToDatabase = async (maxRetries = 3, baseDelayMs = 1000) => {
       logger.info(`Connecting to MongoDB (Attempt ${attempts}/${maxRetries})...`);
 
       const conn = await mongoose.connect(DB_URI, {
-        serverSelectionTimeoutMS: 5000
+        serverSelectionTimeoutMS: 5000,
+        socketTimeoutMS: 45000,
+        maxPoolSize: 10,
+        minPoolSize: 2,
+        connectTimeoutMS: 10000,
+        retryWrites: true
       });
 
       isConnected = true;
       logger.info(`✅ Connected to MongoDB in ${NODE_ENV} mode [Host: ${conn.connection.host}]`);
+
+      await ensureAuditLogsCollection();
 
       mongoose.connection.on('error', (err) => {
         logger.error('MongoDB connection runtime error', { error: err.message });
