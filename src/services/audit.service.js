@@ -42,8 +42,13 @@ export const auditService = {
       return null;
     }
 
+    let timeoutId;
+
     try {
-      // Non-blocking timeout wrapper to ensure audit logs never block main application thread
+      const timeoutPromise = new Promise((_, reject) => {
+        timeoutId = setTimeout(() => reject(new Error('Audit log write timeout')), 3000);
+      });
+
       const logEntry = await Promise.race([
         securityRepository.createAuditLog({
           action: finalAction,
@@ -56,15 +61,17 @@ export const auditService = {
           metadata,
           timestamp: new Date()
         }),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Audit log write timeout')), 3000)
-        )
+        timeoutPromise
       ]);
 
       return logEntry;
     } catch (error) {
       logger.error('Failed to persist audit log', { error: error.message }, correlationId);
       return null;
+    } finally {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
     }
   }
 };
