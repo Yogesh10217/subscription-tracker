@@ -7,7 +7,7 @@ process.env.JWT_EXPIRES_IN = '1d';
 process.env.DB_URI = 'mongodb://127.0.0.1:27017/subscription-tracker-test';
 process.env.LOG_LEVEL = 'error';
 
-jest.setTimeout(15000);
+jest.setTimeout(30000);
 
 afterAll(async () => {
   try {

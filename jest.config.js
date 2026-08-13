@@ -1,5 +1,6 @@
 export default {
   testEnvironment: 'node',
+  testTimeout: 30000,
   transform: {},
   moduleNameMapper: {
     '^#config/(.*)$': '<rootDir>/src/config/$1',

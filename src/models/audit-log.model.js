@@ -5,6 +5,7 @@ const auditLogSchema = new mongoose.Schema(
     action: {
       type: String,
       required: true,
+      default: 'SYSTEM_EVENT',
       index: true
     },
     actor: {
@@ -33,6 +34,7 @@ const auditLogSchema = new mongoose.Schema(
     result: {
       type: String,
       enum: ['SUCCESS', 'FAILURE', 'DENIED'],
+      default: 'SUCCESS',
       required: true
     },
     metadata: {

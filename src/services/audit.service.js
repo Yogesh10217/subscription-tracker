@@ -4,6 +4,7 @@
  * @description Decoupled security audit logging service.
  */
 
+import mongoose from 'mongoose';
 import securityRepository from '../repositories/security.repository.js';
 import logger from '../utils/logger.js';
 
@@ -37,7 +38,8 @@ export const auditService = {
     metadata = {}
   }) {
     const finalAction = action || eventType || 'SYSTEM_EVENT';
-    const finalActor = actor || user || null;
+    const rawActor = actor || user || null;
+    const finalActor = rawActor && mongoose.Types.ObjectId.isValid(rawActor) ? rawActor : null;
 
     try {
       const logEntry = await securityRepository.createAuditLog({
