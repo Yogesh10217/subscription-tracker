@@ -1,18 +1,14 @@
 import tagRepository from '../repositories/tag.repository.js';
 import ApiError from '../utils/api-error.js';
+import { generateSlug } from '../utils/slug.utils.js';
 
 export const tagService = {
   async getTags(userId) {
-    try {
-      await tagRepository.seedSystemTags();
-    } catch (_e) {
-      // Non-blocking seed error
-    }
     return tagRepository.findAllForUser(userId);
   },
 
   async createTag(data, userId) {
-    const slug = data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const slug = generateSlug(data.name);
     return tagRepository.create({ ...data, slug, user: userId, isSystem: false });
   },
 

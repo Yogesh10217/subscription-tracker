@@ -50,8 +50,7 @@ export const trendAnalyticsQuery = {
     });
 
     const activeCount = await Subscription.countDocuments({
-      user: context.userId,
-      isDeleted: false,
+      ...context.getBaseSubscriptionMatch(),
       status: 'Active'
     });
 

@@ -9,10 +9,7 @@ import TimelineEvent from '../../models/timeline-event.model.js';
 
 export const trialAnalyticsQuery = {
   async execute(context) {
-    const baseFilter = {
-      user: context.userId,
-      isDeleted: false
-    };
+    const baseFilter = context.getBaseSubscriptionMatch();
 
     const activeTrials = await Subscription.find({
       ...baseFilter,

@@ -14,15 +14,15 @@ export const subscriptionMetricsQuery = {
    * @returns {Promise<Object>}
    */
   async execute(context) {
-    const userObjectId = new mongoose.Types.ObjectId(context.userId);
+    const baseMatch = context.getBaseSubscriptionMatch();
+    const matchFilter = {
+      ...baseMatch,
+      user: new mongoose.Types.ObjectId(context.userId)
+    };
 
     const pipeline = [
       {
-        $match: {
-          user: userObjectId,
-          ...(context.includeDeleted ? {} : { isDeleted: false }),
-          ...(context.includeArchived ? {} : { isArchived: false })
-        }
+        $match: matchFilter
       },
       {
         $group: {

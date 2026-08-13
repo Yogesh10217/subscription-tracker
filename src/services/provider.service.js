@@ -1,18 +1,14 @@
 import providerRepository from '../repositories/provider.repository.js';
 import ApiError from '../utils/api-error.js';
+import { generateSlug } from '../utils/slug.utils.js';
 
 export const providerService = {
   async getProviders(userId) {
-    try {
-      await providerRepository.seedSystemProviders();
-    } catch (_e) {
-      // Non-blocking seed error
-    }
     return providerRepository.findAllForUser(userId);
   },
 
   async createProvider(data, userId) {
-    const slug = data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const slug = generateSlug(data.name);
     return providerRepository.create({ ...data, slug, user: userId, isSystem: false });
   },
 

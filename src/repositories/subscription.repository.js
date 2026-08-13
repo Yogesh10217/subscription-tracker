@@ -6,6 +6,8 @@
 
 import Subscription from '../models/subscription.model.js';
 
+const STANDARD_POPULATES = ['categoryRef', 'tags', 'provider'];
+
 export class SubscriptionRepository {
   async create(subscriptionData) {
     return Subscription.create(subscriptionData);
@@ -13,42 +15,32 @@ export class SubscriptionRepository {
 
   async findById(id) {
     return Subscription.findOne({ _id: id, isDeleted: false })
-      .populate('categoryRef')
-      .populate('tags')
-      .populate('provider');
+      .populate(STANDARD_POPULATES);
   }
 
   async findByIdWithUser(id) {
     return Subscription.findOne({ _id: id, isDeleted: false })
       .populate('user', 'email name')
-      .populate('categoryRef')
-      .populate('tags')
-      .populate('provider');
+      .populate(STANDARD_POPULATES);
   }
 
   async findByUserId(userId) {
     return Subscription.find({ user: userId, isDeleted: false, isArchived: false })
-      .populate('categoryRef')
-      .populate('tags')
-      .populate('provider')
+      .populate(STANDARD_POPULATES)
       .sort({ renewalDate: 1 });
   }
 
   async findAll(filter = {}) {
     const finalFilter = { isDeleted: false, ...filter };
     return Subscription.find(finalFilter)
-      .populate('categoryRef')
-      .populate('tags')
-      .populate('provider')
+      .populate(STANDARD_POPULATES)
       .sort({ createdAt: -1 });
   }
 
   async findWithQuery(filter = {}, sort = { createdAt: -1 }, skip = 0, limit = 10) {
     const finalFilter = { isDeleted: false, ...filter };
     const items = await Subscription.find(finalFilter)
-      .populate('categoryRef')
-      .populate('tags')
-      .populate('provider')
+      .populate(STANDARD_POPULATES)
       .sort(sort)
       .skip(skip)
       .limit(limit);
@@ -62,9 +54,7 @@ export class SubscriptionRepository {
       new: true,
       runValidators: true
     })
-      .populate('categoryRef')
-      .populate('tags')
-      .populate('provider');
+      .populate(STANDARD_POPULATES);
   }
 
   async softDelete(id, userId) {

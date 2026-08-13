@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import subscriptionRepository from '../repositories/subscription.repository.js';
-import sendReminderEmail from '../utils/send-email.js';
+import emailService from './email.service.js';
 import logger from '../utils/logger.js';
 import ApiError from '../utils/api-error.js';
 
@@ -54,7 +54,7 @@ export class WorkflowService {
     const reminderType = `${reminderDay} days before reminder`;
     subscription.daysLeft = daysUntilRenewal;
 
-    await sendReminderEmail(subscription.user.email, reminderType, subscription);
+    await emailService.sendReminder(subscription.user.email, reminderType, subscription);
 
     return {
       message: 'Reminder email sent successfully',

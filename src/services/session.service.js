@@ -120,13 +120,19 @@ export const sessionService = {
    * @param {string} userId
    * @param {string} [reason='User Logout']
    */
-  async revokeSession(sessionId, userId, reason = 'User Logout') {
-    const session = await sessionRepository.revoke(sessionId, reason);
+  async revokeSession(sessionIdOrHash, userId, reason = 'User Logout') {
+    let targetId = sessionIdOrHash;
+    if (typeof sessionIdOrHash === 'string' && sessionIdOrHash.length === 64) {
+      const existing = await sessionRepository.findAnyByRefreshToken(sessionIdOrHash);
+      if (!existing) return null;
+      targetId = existing._id;
+    }
+    const session = await sessionRepository.revoke(targetId, reason);
     if (session) {
       await auditService.logEvent({
         action: 'SESSION_REVOKED',
         actor: userId,
-        metadata: { sessionId, reason }
+        metadata: { sessionId: targetId, reason }
       });
     }
     return session;

@@ -3,9 +3,13 @@ import sessionService from '../services/session.service.js';
 import asyncHandler from '../utils/async-handler.js';
 import ApiResponse from '../utils/api-response.js';
 
+const getClientInfo = (req) => ({
+  ipAddress: req.ip || req.headers?.['x-forwarded-for'] || '127.0.0.1',
+  userAgent: req.headers?.['user-agent'] || 'Unknown'
+});
+
 export const signUp = asyncHandler(async (req, res) => {
-  const ipAddress = req.ip || req.headers['x-forwarded-for'] || '127.0.0.1';
-  const userAgent = req.headers['user-agent'] || 'Unknown';
+  const { ipAddress, userAgent } = getClientInfo(req);
   const result = await authService.signUp(req.body, ipAddress, userAgent);
 
   res.cookie('refreshToken', result.tokens.refreshToken, {
@@ -19,8 +23,7 @@ export const signUp = asyncHandler(async (req, res) => {
 });
 
 export const signIn = asyncHandler(async (req, res) => {
-  const ipAddress = req.ip || req.headers['x-forwarded-for'] || '127.0.0.1';
-  const userAgent = req.headers['user-agent'] || 'Unknown';
+  const { ipAddress, userAgent } = getClientInfo(req);
   const result = await authService.signIn(req.body, ipAddress, userAgent);
 
   res.cookie('refreshToken', result.refreshToken, {
@@ -35,8 +38,7 @@ export const signIn = asyncHandler(async (req, res) => {
 
 export const refreshToken = asyncHandler(async (req, res) => {
   const token = req.body.refreshToken || req.cookies?.refreshToken;
-  const ipAddress = req.ip || req.headers['x-forwarded-for'] || '127.0.0.1';
-  const userAgent = req.headers['user-agent'] || 'Unknown';
+  const { ipAddress, userAgent } = getClientInfo(req);
 
   const tokens = await authService.refreshTokens(token, ipAddress, userAgent);
 
@@ -54,14 +56,11 @@ export const logout = asyncHandler(async (req, res) => {
   const token = req.body.refreshToken || req.cookies?.refreshToken;
   if (token) {
     const hash = sessionService.hashToken(token);
-    const session = await sessionService.revokeSession(
+    await sessionService.revokeSession(
       hash,
       req.user?._id?.toString(),
       'User Logout'
     );
-    if (session) {
-      await sessionService.revokeSession(session._id, req.user?._id?.toString(), 'User Logout');
-    }
   }
 
   res.clearCookie('refreshToken', { path: '/api/v1/auth' });

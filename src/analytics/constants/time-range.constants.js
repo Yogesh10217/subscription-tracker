@@ -1,7 +1,7 @@
 /**
  * @file time-range.constants.js
  * @module analytics/constants/time-range.constants
- * @description Time range enums and granularities for analytics date calculations.
+ * @description Time range enums for analytics date calculations.
  */
 
 export const TimeRangePeriod = Object.freeze({
@@ -16,11 +16,4 @@ export const TimeRangePeriod = Object.freeze({
   CUSTOM: 'custom'
 });
 
-export const TimeGranularity = Object.freeze({
-  DAY: 'day',
-  WEEK: 'week',
-  MONTH: 'month',
-  YEAR: 'year'
-});
-
-export default { TimeRangePeriod, TimeGranularity };
+export default TimeRangePeriod;

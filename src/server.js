@@ -6,9 +6,23 @@ import { initShutdown } from './config/shutdown.js';
 import NotificationSchedulerService from '#notifications/jobs/notification-scheduler.service.js';
 import logger from './utils/logger.js';
 
+import categoryRepository from './repositories/category.repository.js';
+import providerRepository from './repositories/provider.repository.js';
+import tagRepository from './repositories/tag.repository.js';
+
 const server = app.listen(PORT, async () => {
   logger.info(`🚀 Subscription Tracker server listening on http://localhost:${PORT}`);
   await connectToDatabase();
+
+  try {
+    await Promise.all([
+      categoryRepository.seedSystemCategories(),
+      providerRepository.seedSystemProviders(),
+      tagRepository.seedSystemTags()
+    ]);
+  } catch (_e) {
+    // Non-blocking boot seed error
+  }
 
   let cronTask = null;
 

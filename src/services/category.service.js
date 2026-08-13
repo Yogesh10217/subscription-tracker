@@ -1,18 +1,14 @@
 import categoryRepository from '../repositories/category.repository.js';
 import ApiError from '../utils/api-error.js';
+import { generateSlug } from '../utils/slug.utils.js';
 
 export const categoryService = {
   async getCategories(userId) {
-    try {
-      await categoryRepository.seedSystemCategories();
-    } catch (_e) {
-      // Non-blocking seed error
-    }
     return categoryRepository.findAllForUser(userId);
   },
 
   async createCategory(data, userId) {
-    const slug = data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const slug = generateSlug(data.name);
     return categoryRepository.create({ ...data, slug, user: userId, isSystem: false });
   },
 

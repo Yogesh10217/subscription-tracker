@@ -14,9 +14,7 @@ export const renewalAnalyticsQuery = {
     const in90Days = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
 
     const baseFilter = {
-      user: context.userId,
-      isDeleted: false,
-      isArchived: false,
+      ...context.getBaseSubscriptionMatch(),
       status: 'Active'
     };
 

@@ -1,7 +1,7 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
 
-import requestIdMiddleware from './middleware/request-id.middleware.js';
+import requestContextMiddleware from './middleware/request-context.middleware.js';
 import securityHeadersMiddleware from './middleware/security-headers.middleware.js';
 import arcjetMiddleware from './middleware/arcjet.middleware.js';
 import errorMiddleware from './middleware/error.middleware.js';
@@ -25,7 +25,7 @@ const app = express();
 
 // Security Headers & Core Middleware
 app.use(securityHeadersMiddleware);
-app.use(requestIdMiddleware);
+app.use(requestContextMiddleware);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
