@@ -37,8 +37,12 @@ export const auditService = {
       correlationId
     );
 
-    // Skip Mongoose write if MongoDB is disconnected and not in test environment
-    if (mongoose.connection.readyState !== 1 && process.env.NODE_ENV !== 'test') {
+    const isMocked = Boolean(
+      securityRepository.createAuditLog && securityRepository.createAuditLog._isMockFunction
+    );
+
+    // Skip Mongoose write if MongoDB is disconnected and repository method is not mocked
+    if (mongoose.connection.readyState !== 1 && !isMocked) {
       return null;
     }
 
