@@ -1,6 +1,6 @@
 import http from 'http';
 
-const BASE_URL = process.env.SERVER_URL || 'http://localhost:5500';
+const BASE_URL = process.env.SERVER_URL || 'http://localhost:3000';
 
 function fetchUrl(path) {
   return new Promise((resolve, reject) => {
@@ -15,14 +15,11 @@ function fetchUrl(path) {
 }
 
 async function runSmokeTests() {
-  console.log('🚀 Running SubPulse Platform Smoke Tests...\n');
+  console.log('🚀 Running SubPulse Next.js Platform Smoke Tests...\n');
   const endpoints = [
-    { path: '/health', expected: [200], label: 'System Health Check' },
-    { path: '/ready', expected: [200], label: 'Readiness Probe' },
-    { path: '/live', expected: [200], label: 'Liveness Probe' },
-    { path: '/api/v1/subscriptions/upcoming-renewals', expected: [200], label: 'Upcoming Renewals Endpoint' },
-    { path: '/api/v1/users', expected: [200, 401], label: 'Users Endpoint' },
-    { path: '/', expected: [200], label: 'Frontend Dashboard Index' }
+    { path: '/', expected: [200], label: 'Next.js App Dashboard' },
+    { path: '/api/subscriptions', expected: [200], label: 'Subscriptions API Endpoint' },
+    { path: '/api/analytics', expected: [200], label: 'Analytics Engine API Endpoint' },
   ];
 
   let passed = 0;

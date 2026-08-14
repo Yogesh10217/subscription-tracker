@@ -182,8 +182,15 @@ export const SubscriptionTable: React.FC<SubscriptionTableProps> = ({
                   </td>
 
                   {/* Next Renewal */}
-                  <td className="py-3.5 px-4 font-mono text-xs">
-                    {sub.renewalDate ? new Date(sub.renewalDate).toLocaleDateString() : 'N/A'}
+                  <td className="py-3.5 px-4 font-mono text-xs" suppressHydrationWarning>
+                    {sub.renewalDate
+                      ? new Date(sub.renewalDate).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'numeric',
+                          day: 'numeric',
+                          timeZone: 'UTC',
+                        })
+                      : 'N/A'}
                   </td>
 
                   {/* Status */}

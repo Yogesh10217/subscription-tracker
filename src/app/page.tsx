@@ -18,7 +18,7 @@ const INITIAL_DEMO_SUBSCRIPTIONS: SubscriptionItem[] = [
     paymentMethod: 'Visa ****4242',
     status: 'active',
     startDate: '2024-01-15',
-    renewalDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+    renewalDate: '2026-08-16T00:00:00.000Z',
     notes: 'Family 4K plan',
   },
   {
@@ -31,7 +31,7 @@ const INITIAL_DEMO_SUBSCRIPTIONS: SubscriptionItem[] = [
     paymentMethod: 'Mastercard ****8812',
     status: 'active',
     startDate: '2023-11-01',
-    renewalDate: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000).toISOString(),
+    renewalDate: '2026-08-26T00:00:00.000Z',
   },
   {
     _id: 'sub_3',
@@ -43,7 +43,7 @@ const INITIAL_DEMO_SUBSCRIPTIONS: SubscriptionItem[] = [
     paymentMethod: 'Amex ****9011',
     status: 'active',
     startDate: '2023-06-10',
-    renewalDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+    renewalDate: '2026-08-19T00:00:00.000Z',
   },
   {
     _id: 'sub_4',
@@ -55,7 +55,7 @@ const INITIAL_DEMO_SUBSCRIPTIONS: SubscriptionItem[] = [
     paymentMethod: 'Company Credit Card',
     status: 'active',
     startDate: '2024-02-01',
-    renewalDate: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString(),
+    renewalDate: '2026-09-28T00:00:00.000Z',
   },
   {
     _id: 'sub_5',
@@ -67,7 +67,7 @@ const INITIAL_DEMO_SUBSCRIPTIONS: SubscriptionItem[] = [
     paymentMethod: 'Visa ****4242',
     status: 'trial',
     startDate: '2024-08-01',
-    renewalDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+    renewalDate: '2026-08-17T00:00:00.000Z',
   },
 ];
 

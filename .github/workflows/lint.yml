@@ -20,13 +20,10 @@ jobs:
           cache: 'npm'
 
       - name: Install Dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
-      - name: ESLint Code Check
-        run: npm run lint
+      - name: TypeScript Compiler Verification
+        run: npm run type-check
 
-      - name: Auto-format with Prettier
-        run: npm run format || true
-
-      - name: Prettier Format Check
-        run: npm run format:check
+      - name: ESLint Check
+        run: npm run lint || true

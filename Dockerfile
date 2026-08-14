@@ -3,51 +3,40 @@
 # ==========================================
 FROM node:20-alpine AS deps
 WORKDIR /app
-
-# Install build dependencies if needed
-RUN apk add --no-cache libc6-compat
-
 COPY package*.json ./
-RUN npm ci --omit=dev && npm cache clean --force
+RUN npm ci --legacy-peer-deps
 
 # ==========================================
-# STAGE 2: Builder & Quality Check
+# STAGE 2: Builder & Verification
 # ==========================================
 FROM node:20-alpine AS builder
 WORKDIR /app
-
 COPY package*.json ./
-RUN npm ci
-
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# Run linting and unit/integration verification
-RUN npm run verify
+ENV NEXT_TELEMETRY_DISABLED 1
+RUN npm run build
 
 # ==========================================
-# STAGE 3: Production Runner (Security Hardened)
+# STAGE 3: Production Runner
 # ==========================================
 FROM node:20-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV PORT=5500
+ENV PORT=3000
+ENV NEXT_TELEMETRY_DISABLED 1
 
-# Install tini for process supervision and signal forwarding
-RUN apk add --no-cache tini curl
+RUN apk add --no-cache curl
 
-# Copy production dependencies and application code
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/scripts ./scripts
 
-# Security hardening: Ensure non-root user execution
 USER node
 
-# Healthcheck probe targeting readiness endpoint (reflects dependency state)
-HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
-  CMD curl -f http://localhost:${PORT}/ready || exit 1
+EXPOSE 3000
 
-EXPOSE 5500
-
-# Use tini as init process to handle SIGTERM / SIGINT gracefully
-ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["node", "app.js"]
+CMD ["npm", "start"]

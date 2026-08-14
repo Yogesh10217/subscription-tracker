@@ -24,7 +24,7 @@ services:
       start_period: 10s
 
   # ==========================================
-  # SubPulse Application - Production Profile
+  # SubPulse Next.js Application - Production Profile
   # ==========================================
   app:
     profiles: ["production"]
@@ -35,31 +35,16 @@ services:
     container_name: subpulse-app-prod
     restart: unless-stopped
     ports:
-      - "5500:5500"
+      - "3000:3000"
     environment:
       NODE_ENV: production
-      PORT: 5500
+      PORT: 3000
       DB_URI: mongodb://admin:adminpassword@mongodb:27017/subscription-tracker?authSource=admin
-      JWT_SECRET: super-secret-production-jwt-key-subpulse-2026
-      JWT_EXPIRES_IN: 7d
-      LOG_LEVEL: info
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
-    deploy:
-      resources:
-        limits:
-          cpus: '0.50'
-          memory: 512M
-        reservations:
-          cpus: '0.10'
-          memory: 128M
     depends_on:
       mongodb:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5500/ready"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
       interval: 15s
       timeout: 5s
       retries: 3
@@ -79,38 +64,14 @@ services:
     container_name: subpulse-app-dev
     command: npm run dev
     ports:
-      - "5500:5500"
+      - "3000:3000"
     environment:
       NODE_ENV: development
-      PORT: 5500
+      PORT: 3000
       DB_URI: mongodb://admin:adminpassword@mongodb:27017/subscription-tracker?authSource=admin
-      JWT_SECRET: dev-jwt-secret-key-12345
-      JWT_EXPIRES_IN: 1d
-      LOG_LEVEL: debug
     volumes:
       - .:/app
       - /app/node_modules
-    depends_on:
-      mongodb:
-        condition: service_healthy
-    networks:
-      - subpulse-network
-
-  # ==========================================
-  # Mongo Express Web GUI - Development Profile
-  # ==========================================
-  mongo-express:
-    profiles: ["development"]
-    image: mongo-express:1.0-alpine
-    container_name: subpulse-mongo-express
-    restart: unless-stopped
-    ports:
-      - "8081:8081"
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
-      ME_CONFIG_MONGODB_ADMINPASSWORD: adminpassword
-      ME_CONFIG_MONGODB_URL: mongodb://admin:adminpassword@mongodb:27017/
-      ME_CONFIG_BASICAUTH: "false"
     depends_on:
       mongodb:
         condition: service_healthy
