@@ -1,0 +1,108 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:ital,wght@0,400..800;1,400..800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+body {
+  background-color: #13131b;
+  color: #e4e1ed;
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #13131b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #292932;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #393841;
+}
+
+/* Solid Modern Card Styles without Glassmorphism */
+.subpulse-card {
+  background-color: #1f1f27;
+  border: 1px solid #292932;
+  border-radius: 0.75rem;
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.subpulse-card:hover {
+  border-color: #393841;
+}
+
+.subpulse-input {
+  background-color: #1b1b23;
+  border: 1px solid #292932;
+  color: #e4e1ed;
+  border-radius: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.subpulse-input:focus {
+  outline: none;
+  border-color: #8083ff;
+  box-shadow: 0 0 0 2px rgba(128, 131, 255, 0.2);
+}
+
+.subpulse-btn-primary {
+  background-color: #8083ff;
+  color: #1000a9;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.subpulse-btn-primary:hover {
+  background-color: #c0c1ff;
+  transform: translateY(-1px);
+}
+
+.subpulse-btn-secondary {
+  background-color: #292932;
+  color: #e4e1ed;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border: 1px solid #34343d;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.subpulse-btn-secondary:hover {
+  background-color: #34343d;
+  border-color: #464554;
+}
+
+.data-font {
+  font-family: var(--font-mono);
+}
