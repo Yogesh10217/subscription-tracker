@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-const isStaticExport = process.env.NEXT_PUBLIC_EXPORT === 'true';
+const isExport = process.env.GITHUB_ACTIONS === 'true' || process.env.NEXT_PUBLIC_EXPORT === 'true';
 
 const nextConfig = {
   reactStrictMode: true,
@@ -12,7 +12,7 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  ...(isStaticExport ? { output: 'export' } : {}),
+  ...(isExport ? { output: 'export' } : {}),
 };
 
 export default nextConfig;
