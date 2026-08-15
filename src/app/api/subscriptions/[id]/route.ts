@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
 import Subscription from '@/models/Subscription';
 
+export function generateStaticParams() {
+  return [];
+}
+
 interface RouteParams {
   params: {
     id: string;
