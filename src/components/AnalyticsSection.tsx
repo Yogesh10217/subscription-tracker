@@ -1,26 +1,31 @@
-'use client';
-
 import React from 'react';
 import { PieChart, Zap, ArrowUpRight } from 'lucide-react';
 import { SubscriptionItem } from './SubscriptionTable';
+import { convertCurrency } from '@/utils/currency';
 
 interface AnalyticsSectionProps {
   subscriptions: SubscriptionItem[];
   currencySymbol: string;
+  currency?: string;
 }
 
 export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
   subscriptions,
   currencySymbol,
+  currency = 'USD',
 }) => {
   const categoryTotals: Record<string, number> = {};
   let grandTotal = 0;
 
   subscriptions.forEach((sub) => {
     if (sub.status === 'cancelled') return;
-    let monthlyCost = Number(sub.price) || 0;
-    if (sub.frequency === 'yearly') monthlyCost = sub.price / 12;
-    else if (sub.frequency === 'weekly') monthlyCost = sub.price * 4.33;
+
+    // Convert sub native price to active global target currency
+    const convertedPrice = convertCurrency(sub.price, sub.currency || 'USD', currency);
+
+    let monthlyCost = convertedPrice;
+    if (sub.frequency === 'yearly') monthlyCost = convertedPrice / 12;
+    else if (sub.frequency === 'weekly') monthlyCost = convertedPrice * 4.33;
 
     categoryTotals[sub.category] = (categoryTotals[sub.category] || 0) + monthlyCost;
     grandTotal += monthlyCost;

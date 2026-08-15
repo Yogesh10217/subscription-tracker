@@ -6,26 +6,27 @@ import { MetricCards } from '@/components/MetricCards';
 import { SubscriptionTable, SubscriptionItem } from '@/components/SubscriptionTable';
 import { AnalyticsSection } from '@/components/AnalyticsSection';
 import { SubscriptionModal } from '@/components/SubscriptionModal';
+import { convertCurrency, CURRENCIES } from '@/utils/currency';
 
 const INITIAL_DEMO_SUBSCRIPTIONS: SubscriptionItem[] = [
   {
     _id: 'sub_1',
     name: 'Netflix Premium',
-    price: 19.99,
-    currency: 'USD',
+    price: 649.00,
+    currency: 'INR',
     frequency: 'monthly',
     category: 'Entertainment',
-    paymentMethod: 'Visa ****4242',
+    paymentMethod: 'UPI / Card',
     status: 'active',
     startDate: '2024-01-15',
     renewalDate: '2026-08-16T00:00:00.000Z',
-    notes: 'Family 4K plan',
+    notes: 'Family 4K plan (India)',
   },
   {
     _id: 'sub_2',
     name: 'Spotify Family',
-    price: 16.99,
-    currency: 'USD',
+    price: 179.00,
+    currency: 'INR',
     frequency: 'monthly',
     category: 'Entertainment',
     paymentMethod: 'Mastercard ****8812',
@@ -69,6 +70,30 @@ const INITIAL_DEMO_SUBSCRIPTIONS: SubscriptionItem[] = [
     startDate: '2024-08-01',
     renewalDate: '2026-08-17T00:00:00.000Z',
   },
+  {
+    _id: 'sub_6',
+    name: 'ChatGPT Plus',
+    price: 20.00,
+    currency: 'USD',
+    frequency: 'monthly',
+    category: 'SaaS & Tools',
+    paymentMethod: 'Visa ****4242',
+    status: 'active',
+    startDate: '2024-03-01',
+    renewalDate: '2026-08-22T00:00:00.000Z',
+  },
+  {
+    _id: 'sub_7',
+    name: 'Vercel Pro Plan',
+    price: 20.00,
+    currency: 'USD',
+    frequency: 'monthly',
+    category: 'Cloud & Hosting',
+    paymentMethod: 'Amex ****9011',
+    status: 'active',
+    startDate: '2024-04-12',
+    renewalDate: '2026-08-30T00:00:00.000Z',
+  },
 ];
 
 export default function DashboardPage() {
@@ -77,14 +102,8 @@ export default function DashboardPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSub, setEditingSub] = useState<SubscriptionItem | null>(null);
 
-  // Currency Symbols
-  const currencySymbols: Record<string, string> = {
-    USD: '$',
-    INR: '₹',
-    EUR: '€',
-    GBP: '£',
-  };
-  const currencySymbol = currencySymbols[currency] || '$';
+  // Currency Symbol from CURRENCIES engine
+  const currencySymbol = CURRENCIES[currency]?.symbol || '$';
 
   // Fetch real data from API route if MongoDB is connected
   useEffect(() => {
@@ -102,7 +121,7 @@ export default function DashboardPage() {
     loadSubscriptions();
   }, []);
 
-  // Calculate Metrics
+  // Calculate Metrics with currency conversion
   let totalMonthlySpend = 0;
   let activeCount = 0;
   let trialCount = 0;
@@ -115,9 +134,12 @@ export default function DashboardPage() {
   subscriptions.forEach((sub) => {
     if (sub.status === 'cancelled') return;
 
-    let monthlyCost = Number(sub.price) || 0;
-    if (sub.frequency === 'yearly') monthlyCost = sub.price / 12;
-    else if (sub.frequency === 'weekly') monthlyCost = sub.price * 4.33;
+    // Convert native subscription price into the currently active target currency
+    const convertedPrice = convertCurrency(sub.price, sub.currency || 'USD', currency);
+
+    let monthlyCost = convertedPrice;
+    if (sub.frequency === 'yearly') monthlyCost = convertedPrice / 12;
+    else if (sub.frequency === 'weekly') monthlyCost = convertedPrice * 4.33;
 
     totalMonthlySpend += monthlyCost;
 
@@ -237,12 +259,13 @@ export default function DashboardPage() {
         />
 
         {/* Analytics Breakdown & AI Insights */}
-        <AnalyticsSection subscriptions={subscriptions} currencySymbol={currencySymbol} />
+        <AnalyticsSection subscriptions={subscriptions} currencySymbol={currencySymbol} currency={currency} />
 
         {/* Active Subscriptions Table */}
         <SubscriptionTable
           subscriptions={subscriptions}
           currencySymbol={currencySymbol}
+          currency={currency}
           onEdit={handleEditSub}
           onDelete={handleDeleteSub}
           onStatusChange={handleStatusChange}

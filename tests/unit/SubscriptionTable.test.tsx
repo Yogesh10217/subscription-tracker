@@ -36,6 +36,7 @@ describe('SubscriptionTable Component', () => {
       <SubscriptionTable
         subscriptions={mockSubscriptions}
         currencySymbol="$"
+        currency="USD"
         onEdit={jest.fn()}
         onDelete={jest.fn()}
         onStatusChange={jest.fn()}
@@ -51,6 +52,7 @@ describe('SubscriptionTable Component', () => {
       <SubscriptionTable
         subscriptions={mockSubscriptions}
         currencySymbol="$"
+        currency="USD"
         onEdit={jest.fn()}
         onDelete={jest.fn()}
         onStatusChange={jest.fn()}

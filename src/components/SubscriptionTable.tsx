@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import { Search, Filter, Trash2, Edit3, ExternalLink, Shield, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { ServiceLogo } from './ServiceLogo';
+import { convertCurrency, CURRENCIES } from '@/utils/currency';
 
 export interface SubscriptionItem {
   _id: string;
@@ -21,6 +23,7 @@ export interface SubscriptionItem {
 interface SubscriptionTableProps {
   subscriptions: SubscriptionItem[];
   currencySymbol: string;
+  currency: string;
   onEdit: (sub: SubscriptionItem) => void;
   onDelete: (id: string) => void;
   onStatusChange: (id: string, newStatus: string) => void;
@@ -29,6 +32,7 @@ interface SubscriptionTableProps {
 export const SubscriptionTable: React.FC<SubscriptionTableProps> = ({
   subscriptions,
   currencySymbol,
+  currency = 'USD',
   onEdit,
   onDelete,
   onStatusChange,
@@ -154,9 +158,7 @@ export const SubscriptionTable: React.FC<SubscriptionTableProps> = ({
                   {/* Service Name & Icon */}
                   <td className="py-3.5 px-4 font-semibold text-white">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-[#292932] flex items-center justify-center text-sm font-bold text-[#8083ff]">
-                        {sub.name.charAt(0).toUpperCase()}
-                      </div>
+                      <ServiceLogo name={sub.name} size="md" />
                       <div>
                         <div className="font-semibold text-white text-sm">{sub.name}</div>
                         <div className="text-[10px] text-[#908fa0]">{sub.paymentMethod || 'Credit Card'}</div>
@@ -175,10 +177,27 @@ export const SubscriptionTable: React.FC<SubscriptionTableProps> = ({
                   <td className="py-3.5 px-4 capitalize">{sub.frequency}</td>
 
                   {/* Price */}
-                  <td className="py-3.5 px-4 font-mono font-bold text-white text-sm">
-                    {currencySymbol}
-                    {Number(sub.price).toFixed(2)}
-                    <span className="text-[10px] font-normal text-[#908fa0]">/{sub.frequency.charAt(0)}</span>
+                  <td className="py-3.5 px-4 font-mono text-xs">
+                    {(() => {
+                      const nativeSymbol = CURRENCIES[sub.currency || 'USD']?.symbol || '$';
+                      const isDifferent = (sub.currency || 'USD') !== (currency || 'USD');
+                      const converted = convertCurrency(sub.price, sub.currency || 'USD', currency);
+                      return (
+                        <div>
+                          <div className="font-bold text-white text-sm">
+                            {nativeSymbol}{Number(sub.price).toFixed(2)}
+                            <span className="text-[10px] font-normal text-[#908fa0] ml-1">
+                              {sub.currency || 'USD'} / {sub.frequency.charAt(0)}
+                            </span>
+                          </div>
+                          {isDifferent && (
+                            <div className="text-[11px] text-[#4cd7f6] font-medium">
+                              ≈ {currencySymbol}{converted.toFixed(2)}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </td>
 
                   {/* Next Renewal */}

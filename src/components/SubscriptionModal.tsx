@@ -1,8 +1,8 @@
-'use client';
-
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Save } from 'lucide-react';
+import { X, Plus, Save, Sparkles } from 'lucide-react';
 import { SubscriptionItem } from './SubscriptionTable';
+import { ServiceLogo } from './ServiceLogo';
+import { matchBrandByName } from '@/utils/brandLogos';
 
 interface SubscriptionModalProps {
   isOpen: boolean;
@@ -22,6 +22,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   const [formData, setFormData] = useState({
     name: '',
     price: '',
+    currency: currency || 'USD',
     frequency: 'monthly',
     category: 'Entertainment',
     paymentMethod: 'Credit Card',
@@ -35,6 +36,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       setFormData({
         name: editingSubscription.name || '',
         price: editingSubscription.price ? String(editingSubscription.price) : '',
+        currency: editingSubscription.currency || currency || 'USD',
         frequency: editingSubscription.frequency || 'monthly',
         category: editingSubscription.category || 'Entertainment',
         paymentMethod: editingSubscription.paymentMethod || 'Credit Card',
@@ -48,6 +50,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       setFormData({
         name: '',
         price: '',
+        currency: currency || 'USD',
         frequency: 'monthly',
         category: 'Entertainment',
         paymentMethod: 'Credit Card',
@@ -56,7 +59,16 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         notes: '',
       });
     }
-  }, [editingSubscription, isOpen]);
+  }, [editingSubscription, isOpen, currency]);
+
+  const handleNameChange = (val: string) => {
+    const brand = matchBrandByName(val);
+    setFormData((prev) => ({
+      ...prev,
+      name: val,
+      category: brand ? brand.category : prev.category,
+    }));
+  };
 
   if (!isOpen) return null;
 
@@ -68,7 +80,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       ...(editingSubscription ? { _id: editingSubscription._id } : {}),
       name: formData.name,
       price: parseFloat(formData.price),
-      currency,
+      currency: formData.currency,
       frequency: formData.frequency,
       category: formData.category,
       paymentMethod: formData.paymentMethod,
@@ -79,6 +91,8 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
     onClose();
   };
+
+  const detectedBrand = matchBrandByName(formData.name);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
@@ -99,29 +113,51 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div>
-            <label className="block text-[#908fa0] mb-1 font-medium">Service Name *</label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. Netflix, AWS, Spotify"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="subpulse-input w-full"
-            />
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-[#908fa0] font-medium">Service Name *</label>
+              {detectedBrand && (
+                <span className="text-[10px] text-[#10B981] font-semibold flex items-center gap-1">
+                  <Sparkles className="w-3 h-3" /> Auto-detected {detectedBrand.name}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-2.5">
+              <ServiceLogo name={formData.name} size="md" />
+              <input
+                type="text"
+                required
+                placeholder="e.g. Netflix, AWS, Spotify, GitHub, Figma, ChatGPT"
+                value={formData.name}
+                onChange={(e) => handleNameChange(e.target.value)}
+                className="subpulse-input flex-1"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[#908fa0] mb-1 font-medium">Price ({currency}) *</label>
-              <input
-                type="number"
-                step="0.01"
-                required
-                placeholder="19.99"
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                className="subpulse-input w-full font-mono"
-              />
+              <label className="block text-[#908fa0] mb-1 font-medium">Billed Price & Currency *</label>
+              <div className="flex items-center gap-1.5">
+                <select
+                  value={formData.currency}
+                  onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+                  className="subpulse-input bg-[#1b1b23] font-mono w-20 text-center font-semibold text-[#8083ff]"
+                >
+                  <option value="INR">₹ INR</option>
+                  <option value="USD">$ USD</option>
+                  <option value="EUR">€ EUR</option>
+                  <option value="GBP">£ GBP</option>
+                </select>
+                <input
+                  type="number"
+                  step="0.01"
+                  required
+                  placeholder="19.99"
+                  value={formData.price}
+                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                  className="subpulse-input flex-1 font-mono"
+                />
+              </div>
             </div>
 
             <div>
