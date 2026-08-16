@@ -6,6 +6,7 @@ import { MetricCards } from '@/components/MetricCards';
 import { SubscriptionTable, SubscriptionItem } from '@/components/SubscriptionTable';
 import { AnalyticsSection } from '@/components/AnalyticsSection';
 import { SubscriptionModal } from '@/components/SubscriptionModal';
+import { EmailNotificationModal } from '@/components/EmailNotificationModal';
 import { convertCurrency, CURRENCIES } from '@/utils/currency';
 
 const INITIAL_DEMO_SUBSCRIPTIONS: SubscriptionItem[] = [
@@ -100,6 +101,7 @@ export default function DashboardPage() {
   const [currency, setCurrency] = useState('USD');
   const [subscriptions, setSubscriptions] = useState<SubscriptionItem[]>(INITIAL_DEMO_SUBSCRIPTIONS);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [editingSub, setEditingSub] = useState<SubscriptionItem | null>(null);
 
   // Currency Symbol from CURRENCIES engine
@@ -244,6 +246,7 @@ export default function DashboardPage() {
         onCurrencyChange={setCurrency}
         onOpenAddModal={handleOpenAddModal}
         onExportReport={handleExportReport}
+        onOpenEmailModal={() => setIsEmailModalOpen(true)}
       />
 
       {/* Main Container */}
@@ -289,6 +292,14 @@ export default function DashboardPage() {
         onSave={handleSaveSub}
         editingSubscription={editingSub}
         currency={currency}
+      />
+
+      {/* Modal for Live Email Notifications */}
+      <EmailNotificationModal
+        isOpen={isEmailModalOpen}
+        onClose={() => setIsEmailModalOpen(false)}
+        subscriptions={subscriptions}
+        currencySymbol={currencySymbol}
       />
     </div>
   );

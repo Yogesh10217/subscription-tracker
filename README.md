@@ -1,8 +1,8 @@
 # ⚡ SubPulse — Next.js 14 Subscription Management Engine
 
-**SubPulse** is a state-of-the-art, production-ready SaaS subscription management platform built with **Next.js 14 (App Router)**, **React 18**, **TypeScript**, **Mongoose / MongoDB**, and **TailwindCSS**.
+**SubPulse** is a state-of-the-art, production-ready SaaS subscription management platform built with **Next.js 14 (App Router)**, **React 18**, **TypeScript**, **Mongoose / MongoDB**, **Nodemailer**, and **TailwindCSS**.
 
-Designed according to solid dark surface UI principles, SubPulse empowers users to track recurring software, streaming, cloud infrastructure, and utility expenses with automated brand icon detection, real-time multi-currency conversions, and intelligent cost allocation analytics.
+Designed according to solid dark surface UI principles, SubPulse empowers users to track recurring software, streaming, cloud infrastructure, and utility expenses with automated brand icon detection, real-time multi-currency conversions, automated Nodemailer Gmail renewal alerts, and intelligent cost allocation analytics.
 
 ---
 
@@ -17,11 +17,16 @@ Designed according to solid dark surface UI principles, SubPulse empowers users 
 - **Accurate Metric Aggregation**: Aggregates total monthly spend, estimated annual costs, and potential savings accurately across multi-currency accounts.
 - **Dual Price Display**: Data tables display both the native billed price (`₹649.00 INR`) and the live converted equivalent (`≈ $7.77 USD`).
 
-### 3. 📊 Analytics & Intelligent Optimization
+### 3. 📧 Nodemailer Gmail Notification Engine
+- **Automated Renewal Alerts**: Sends beautifully formatted HTML email alerts before subscriptions auto-renew.
+- **Serverless Email API**: Serverless route `/api/notifications/email` handles SMTP delivery.
+- **Interactive Gmail Alert Center**: Click the **Bell Icon** in the top navigation bar to test live Gmail alerts for any subscription.
+
+### 4. 📊 Analytics & Intelligent Optimization
 - **Category Allocation**: Visual progress bars mapping monthly spending across domain categories.
 - **AI Recommendation Engine**: Uncovers annual billing savings (saving up to 18% by switching to yearly plans).
 
-### 4. 🛡️ Enterprise Engineering & Quality
+### 5. 🛡️ Enterprise Engineering & Quality
 - **100% Type-Safe**: Built with strict TypeScript checks (`tsc --noEmit`).
 - **Unit Testing Suite**: High test coverage (**98%+**) powered by **Jest** and **React Testing Library**.
 - **Multi-Stage Docker Image**: Optimized multi-stage `Dockerfile` (`node:20-alpine`) ready for containerized deployment.
@@ -34,6 +39,7 @@ Designed according to solid dark surface UI principles, SubPulse empowers users 
 - **Framework**: [Next.js 14](https://nextjs.org/) (App Router)
 - **Language**: [TypeScript 5](https://www.typescriptlang.org/)
 - **UI Library**: [React 18](https://react.dev/) + [TailwindCSS 3](https://tailwindcss.com/)
+- **Email Delivery**: [Nodemailer](https://nodemailer.com/)
 - **Icons**: [Lucide React](https://lucide.dev/)
 - **Database**: [Mongoose 8](https://mongoosejs.com/) / [MongoDB](https://www.mongodb.com/)
 - **Testing**: [Jest](https://jestjs.io/) & [React Testing Library](https://testing-library.com/)
@@ -67,6 +73,13 @@ Designed according to solid dark surface UI principles, SubPulse empowers users 
    MONGODB_URI=mongodb://localhost:27017/subscription-tracker
    PORT=3000
    NEXT_TELEMETRY_DISABLED=1
+
+   # SMTP Gmail Email Credentials
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=587
+   SMTP_USER=your-email@gmail.com
+   SMTP_PASS=your-gmail-app-password
+   EMAIL_FROM="SubPulse Alerts <your-email@gmail.com>"
    ```
 
 4. **Run the Development Server**:
@@ -74,6 +87,18 @@ Designed according to solid dark surface UI principles, SubPulse empowers users 
    npm run dev
    ```
    Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## 🔑 Gmail App Password Setup
+
+To enable Nodemailer email alerts:
+
+1. Enable **2-Step Verification** on your Google Account: [Google 2FA Settings](https://myaccount.google.com/signinoptions/two-step-verification).
+2. Generate an **App Password**: [Google App Passwords](https://myaccount.google.com/apppasswords).
+   - App: **Mail**
+   - Device: **Other (SubPulse)**
+3. Copy the generated 16-character password into your `.env` file (`SMTP_PASS`).
 
 ---
 
@@ -112,21 +137,17 @@ docker run -p 3000:3000 subpulse:latest
 
 SubPulse includes an automated **GitHub Actions Workflow** (`.github/workflows/deploy-pages.yml`) for deploying static builds to GitHub Pages.
 
-### Setup Instructions:
-
-1. Push your repository code to GitHub:
+1. **Push your code to GitHub**:
    ```bash
    git add .
-   git commit -m "feat: complete Next.js 14 upgrade with brand logos & multi-currency engine"
+   git commit -m "feat: complete Next.js 14 upgrade with Nodemailer Gmail alerts"
    git push origin main
    ```
 
-2. Enable GitHub Pages in your repository settings:
-   - Go to **Settings** -> **Pages**.
-   - Under **Build and deployment** -> **Source**, select **GitHub Actions**.
-
-3. The workflow will automatically trigger on `push` to `main` and deploy your site to:
-   `https://<your-username>.github.io/subscription-tracker/`
+2. **Enable GitHub Pages**:
+   - Go to **Settings** -> **Pages** in your GitHub repository.
+   - Set **Source** to **GitHub Actions**.
+   - Your live site will be deployed at `https://yogesh10217.github.io/subscription-tracker/`.
 
 ---
 

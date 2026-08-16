@@ -8,6 +8,7 @@ interface HeaderProps {
   onCurrencyChange: (currency: string) => void;
   onOpenAddModal: () => void;
   onExportReport: () => void;
+  onOpenEmailModal?: () => void;
   unreadNotificationsCount?: number;
 }
 
@@ -16,6 +17,7 @@ export const Header: React.FC<HeaderProps> = ({
   onCurrencyChange,
   onOpenAddModal,
   onExportReport,
+  onOpenEmailModal,
   unreadNotificationsCount = 2,
 }) => {
   return (
@@ -67,10 +69,11 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Notifications Button */}
           <button
-            title="Notifications"
-            className="p-2 rounded-lg bg-[#1b1b23] border border-[#292932] text-[#c7c4d7] hover:text-white hover:border-[#34343d] transition-all relative"
+            onClick={onOpenEmailModal}
+            title="Send Live Gmail Alert"
+            className="p-2 rounded-lg bg-[#1b1b23] border border-[#292932] text-[#c7c4d7] hover:text-white hover:border-[#8083ff] transition-all relative group"
           >
-            <Bell className="w-4.5 h-4.5" />
+            <Bell className="w-4.5 h-4.5 group-hover:text-[#8083ff]" />
             {unreadNotificationsCount > 0 && (
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#EF4444] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                 {unreadNotificationsCount}
