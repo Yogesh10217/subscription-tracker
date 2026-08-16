@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const isExport = process.env.GITHUB_ACTIONS === 'true' || process.env.NEXT_PUBLIC_EXPORT === 'true';
+const repoName = 'subscription-tracker';
+const basePath = isExport ? `/${repoName}` : '';
 
 const nextConfig = {
   reactStrictMode: true,
@@ -12,7 +14,13 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  ...(isExport ? { output: 'export' } : {}),
+  ...(isExport
+    ? {
+        output: 'export',
+        basePath: basePath,
+        assetPrefix: `${basePath}/`,
+      }
+    : {}),
 };
 
 export default nextConfig;
