@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Save, Sparkles } from 'lucide-react';
+import { X, Save, Sparkles } from 'lucide-react';
 import { SubscriptionItem } from './SubscriptionTable';
 import { ServiceLogo } from './ServiceLogo';
 import { matchBrandByName } from '@/utils/brandLogos';
@@ -12,6 +12,24 @@ interface SubscriptionModalProps {
   currency: string;
 }
 
+// Shared form field wrapper
+function Field({ label, children }: { label: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between">{label}</div>
+      {children}
+    </div>
+  );
+}
+
+function FieldLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="font-mono text-[10px] font-medium tracking-[0.12em] uppercase text-[#6B6B6B]">
+      {children}
+    </span>
+  );
+}
+
 export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   isOpen,
   onClose,
@@ -20,43 +38,43 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   currency,
 }) => {
   const [formData, setFormData] = useState({
-    name: '',
-    price: '',
-    currency: currency || 'USD',
-    frequency: 'monthly',
-    category: 'Entertainment',
+    name:          '',
+    price:         '',
+    currency:      currency || 'USD',
+    frequency:     'monthly',
+    category:      'Entertainment',
     paymentMethod: 'Credit Card',
-    status: 'active',
-    startDate: new Date().toISOString().split('T')[0],
-    notes: '',
+    status:        'active',
+    startDate:     new Date().toISOString().split('T')[0],
+    notes:         '',
   });
 
   useEffect(() => {
     if (editingSubscription) {
       setFormData({
-        name: editingSubscription.name || '',
-        price: editingSubscription.price ? String(editingSubscription.price) : '',
-        currency: editingSubscription.currency || currency || 'USD',
-        frequency: editingSubscription.frequency || 'monthly',
-        category: editingSubscription.category || 'Entertainment',
+        name:          editingSubscription.name || '',
+        price:         editingSubscription.price ? String(editingSubscription.price) : '',
+        currency:      editingSubscription.currency || currency || 'USD',
+        frequency:     editingSubscription.frequency || 'monthly',
+        category:      editingSubscription.category || 'Entertainment',
         paymentMethod: editingSubscription.paymentMethod || 'Credit Card',
-        status: editingSubscription.status || 'active',
-        startDate: editingSubscription.startDate
+        status:        editingSubscription.status || 'active',
+        startDate:     editingSubscription.startDate
           ? new Date(editingSubscription.startDate).toISOString().split('T')[0]
           : new Date().toISOString().split('T')[0],
-        notes: editingSubscription.notes || '',
+        notes:         editingSubscription.notes || '',
       });
     } else {
       setFormData({
-        name: '',
-        price: '',
-        currency: currency || 'USD',
-        frequency: 'monthly',
-        category: 'Entertainment',
+        name:          '',
+        price:         '',
+        currency:      currency || 'USD',
+        frequency:     'monthly',
+        category:      'Entertainment',
         paymentMethod: 'Credit Card',
-        status: 'active',
-        startDate: new Date().toISOString().split('T')[0],
-        notes: '',
+        status:        'active',
+        startDate:     new Date().toISOString().split('T')[0],
+        notes:         '',
       });
     }
   }, [editingSubscription, isOpen, currency]);
@@ -65,89 +83,103 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
     const brand = matchBrandByName(val);
     setFormData((prev) => ({
       ...prev,
-      name: val,
+      name:     val,
       category: brand ? brand.category : prev.category,
     }));
   };
 
-  if (!isOpen) return null;
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.price) return;
-
     onSave({
       ...(editingSubscription ? { _id: editingSubscription._id } : {}),
-      name: formData.name,
-      price: parseFloat(formData.price),
-      currency: formData.currency,
-      frequency: formData.frequency,
-      category: formData.category,
+      name:          formData.name,
+      price:         parseFloat(formData.price),
+      currency:      formData.currency,
+      frequency:     formData.frequency,
+      category:      formData.category,
       paymentMethod: formData.paymentMethod,
-      status: formData.status as any,
-      startDate: formData.startDate,
-      notes: formData.notes,
+      status:        formData.status as any,
+      startDate:     formData.startDate,
+      notes:         formData.notes,
     });
-
     onClose();
   };
+
+  if (!isOpen) return null;
 
   const detectedBrand = matchBrandByName(formData.name);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
-      <div className="subpulse-card w-full max-w-lg p-6 bg-[#1f1f27] border-[#292932] shadow-2xl relative">
-        {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-[#292932] mb-5">
-          <h3 className="text-lg font-bold text-white">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1A1A1A]/40 backdrop-blur-sm"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="w-full max-w-lg bg-white rounded-lg border border-[#E8E4DF] shadow-[0_8px_32px_rgba(26,26,26,0.10)] relative">
+
+        {/* ── Header ─────────────────────────────────────────────── */}
+        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-[#E8E4DF]">
+          <h3 className="font-serif text-xl text-[#1A1A1A] tracking-tight leading-snug">
             {editingSubscription ? 'Edit Subscription' : 'Add New Subscription'}
           </h3>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg hover:bg-[#292932] text-[#908fa0] hover:text-white transition-colors"
+            className="p-1.5 rounded-md hover:bg-[#F5F3F0] text-[#9CA3AF] hover:text-[#1A1A1A] transition-colors"
+            aria-label="Close modal"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-[#908fa0] font-medium">Service Name *</label>
-              {detectedBrand && (
-                <span className="text-[10px] text-[#10B981] font-semibold flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" /> Auto-detected {detectedBrand.name}
-                </span>
-              )}
-            </div>
+        {/* ── Form ───────────────────────────────────────────────── */}
+        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+
+          {/* Service name */}
+          <Field
+            label={
+              <>
+                <FieldLabel>Service Name *</FieldLabel>
+                {detectedBrand && (
+                  <span className="flex items-center gap-1 font-mono text-[10px] font-medium tracking-[0.08em] uppercase text-[#B8860B]">
+                    <Sparkles className="w-3 h-3" />
+                    Auto-detected {detectedBrand.name}
+                  </span>
+                )}
+              </>
+            }
+          >
             <div className="flex items-center gap-2.5">
               <ServiceLogo name={formData.name} size="md" />
               <input
                 type="text"
                 required
-                placeholder="e.g. Netflix, AWS, Spotify, GitHub, Figma, ChatGPT"
+                placeholder="e.g. Netflix, AWS, Spotify, Figma…"
                 value={formData.name}
                 onChange={(e) => handleNameChange(e.target.value)}
-                className="subpulse-input flex-1"
+                className="serif-input"
               />
             </div>
-          </div>
+          </Field>
 
+          {/* Price & Currency */}
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[#908fa0] mb-1 font-medium">Billed Price & Currency *</label>
+            <Field label={<FieldLabel>Price *</FieldLabel>}>
               <div className="flex items-center gap-1.5">
-                <select
-                  value={formData.currency}
-                  onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                  className="subpulse-input bg-[#1b1b23] font-mono w-20 text-center font-semibold text-[#8083ff]"
-                >
-                  <option value="INR">₹ INR</option>
-                  <option value="USD">$ USD</option>
-                  <option value="EUR">€ EUR</option>
-                  <option value="GBP">£ GBP</option>
-                </select>
+                {/* Currency prefix select */}
+                <div className="relative flex-shrink-0">
+                  <select
+                    value={formData.currency}
+                    onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+                    className="serif-select min-h-0 h-11 text-xs font-mono font-semibold text-[#B8860B] pr-6 appearance-none"
+                    style={{ width: '72px' }}
+                  >
+                    <option value="INR">₹ INR</option>
+                    <option value="USD">$ USD</option>
+                    <option value="EUR">€ EUR</option>
+                    <option value="GBP">£ GBP</option>
+                  </select>
+                  <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[9px] text-[#6B6B6B]">▼</span>
+                </div>
                 <input
                   type="number"
                   step="0.01"
@@ -155,99 +187,106 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                   placeholder="19.99"
                   value={formData.price}
                   onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                  className="subpulse-input flex-1 font-mono"
+                  className="serif-input font-mono"
                 />
               </div>
-            </div>
+            </Field>
 
-            <div>
-              <label className="block text-[#908fa0] mb-1 font-medium">Billing Cycle</label>
-              <select
-                value={formData.frequency}
-                onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
-                className="subpulse-input w-full bg-[#1b1b23]"
-              >
-                <option value="monthly">Monthly</option>
-                <option value="yearly">Yearly</option>
-                <option value="weekly">Weekly</option>
-                <option value="daily">Daily</option>
-              </select>
-            </div>
+            <Field label={<FieldLabel>Billing Cycle</FieldLabel>}>
+              <div className="relative">
+                <select
+                  value={formData.frequency}
+                  onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
+                  className="serif-select appearance-none pr-7"
+                >
+                  <option value="monthly">Monthly</option>
+                  <option value="yearly">Yearly</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="daily">Daily</option>
+                </select>
+                <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-[#6B6B6B]">▼</span>
+              </div>
+            </Field>
           </div>
 
+          {/* Category & Status */}
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[#908fa0] mb-1 font-medium">Category</label>
-              <select
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="subpulse-input w-full bg-[#1b1b23]"
-              >
-                <option value="Entertainment">Entertainment</option>
-                <option value="SaaS & Tools">SaaS & Tools</option>
-                <option value="Cloud & Hosting">Cloud & Hosting</option>
-                <option value="Utilities">Utilities</option>
-                <option value="Fitness & Health">Fitness & Health</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
+            <Field label={<FieldLabel>Category</FieldLabel>}>
+              <div className="relative">
+                <select
+                  value={formData.category}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  className="serif-select appearance-none pr-7"
+                >
+                  <option value="Entertainment">Entertainment</option>
+                  <option value="SaaS & Tools">SaaS &amp; Tools</option>
+                  <option value="Cloud & Hosting">Cloud &amp; Hosting</option>
+                  <option value="Utilities">Utilities</option>
+                  <option value="Fitness & Health">Fitness &amp; Health</option>
+                  <option value="Other">Other</option>
+                </select>
+                <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-[#6B6B6B]">▼</span>
+              </div>
+            </Field>
 
-            <div>
-              <label className="block text-[#908fa0] mb-1 font-medium">Status</label>
-              <select
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="subpulse-input w-full bg-[#1b1b23]"
-              >
-                <option value="active">Active</option>
-                <option value="trial">Trial</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-            </div>
+            <Field label={<FieldLabel>Status</FieldLabel>}>
+              <div className="relative">
+                <select
+                  value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                  className="serif-select appearance-none pr-7"
+                >
+                  <option value="active">Active</option>
+                  <option value="trial">Trial</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+                <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-[#6B6B6B]">▼</span>
+              </div>
+            </Field>
           </div>
 
+          {/* Start Date & Payment */}
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[#908fa0] mb-1 font-medium">Start Date</label>
+            <Field label={<FieldLabel>Start Date</FieldLabel>}>
               <input
                 type="date"
                 value={formData.startDate}
                 onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                className="subpulse-input w-full font-mono"
+                className="serif-input font-mono"
               />
-            </div>
+            </Field>
 
-            <div>
-              <label className="block text-[#908fa0] mb-1 font-medium">Payment Method</label>
+            <Field label={<FieldLabel>Payment Method</FieldLabel>}>
               <input
                 type="text"
                 placeholder="e.g. Visa ****4242"
                 value={formData.paymentMethod}
                 onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
-                className="subpulse-input w-full"
+                className="serif-input"
               />
-            </div>
+            </Field>
           </div>
 
-          <div>
-            <label className="block text-[#908fa0] mb-1 font-medium">Notes (Optional)</label>
+          {/* Notes */}
+          <Field label={<FieldLabel>Notes (optional)</FieldLabel>}>
             <textarea
               rows={2}
-              placeholder="Add any reminders or plan details..."
+              placeholder="Add any reminders or plan details…"
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              className="subpulse-input w-full resize-none"
+              className="serif-input resize-none py-2.5 leading-relaxed"
+              style={{ minHeight: 'unset', height: 'auto' }}
             />
-          </div>
+          </Field>
 
-          {/* Action Footer */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#292932]">
-            <button type="button" onClick={onClose} className="subpulse-btn-secondary py-2 text-xs">
+          {/* ── Footer ───────────────────────────────────────────── */}
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#E8E4DF] mt-2">
+            <button type="button" onClick={onClose} className="serif-btn-secondary min-h-0 h-10 px-4 text-sm">
               Cancel
             </button>
-            <button type="submit" className="subpulse-btn-primary py-2 text-xs">
+            <button type="submit" className="serif-btn-primary min-h-0 h-10 px-5 text-sm">
               <Save className="w-4 h-4" />
-              <span>{editingSubscription ? 'Update Subscription' : 'Create Subscription'}</span>
+              {editingSubscription ? 'Update Subscription' : 'Create Subscription'}
             </button>
           </div>
         </form>

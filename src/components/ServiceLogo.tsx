@@ -26,7 +26,7 @@ export const ServiceLogo: React.FC<ServiceLogoProps> = ({ name, size = 'md' }) =
   if (brand) {
     return (
       <div
-        className={`${dimensions} rounded-xl flex items-center justify-center border border-white/10 shrink-0 transition-transform hover:scale-105`}
+        className={`${dimensions} rounded-lg flex items-center justify-center border border-[#E8E4DF]/70 shrink-0 transition-transform duration-200 hover:scale-105`}
         style={{ backgroundColor: brand.bgColor }}
       >
         {brand.svg(svgDimensions)}
@@ -34,11 +34,11 @@ export const ServiceLogo: React.FC<ServiceLogoProps> = ({ name, size = 'md' }) =
     );
   }
 
-  // Stylish Fallback Monogram Avatar
+  // Warm fallback monogram avatar — ivory background, gold initial
   const initial = name ? name.charAt(0).toUpperCase() : 'S';
   return (
     <div
-      className={`${dimensions} rounded-xl bg-[#292932] border border-[#34343d] flex items-center justify-center font-bold text-[#8083ff] shrink-0`}
+      className={`${dimensions} rounded-lg bg-[#F5F3F0] border border-[#E8E4DF] flex items-center justify-center font-serif font-semibold text-[#B8860B] shrink-0`}
     >
       {initial}
     </div>

@@ -3,7 +3,8 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'SubPulse — Intelligent Subscription Tracker',
-  description: 'Manage, analyze, and optimize your personal and enterprise recurring subscriptions with real-time analytics.',
+  description:
+    'Manage, analyze, and optimize your personal and enterprise recurring subscriptions with real-time analytics.',
 };
 
 export default function RootLayout({
@@ -12,8 +13,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className="bg-[#13131b] text-[#e4e1ed] antialiased min-h-screen">
+    // Light-mode only: serif design system is intrinsically warm and light.
+    // darkMode: 'class' stays in tailwind.config.js for future toggle optionality.
+    <html lang="en">
+      <body className="bg-background text-foreground antialiased min-h-screen">
         {children}
       </body>
     </html>

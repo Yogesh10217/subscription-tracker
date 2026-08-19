@@ -104,10 +104,9 @@ export default function DashboardPage() {
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [editingSub, setEditingSub] = useState<SubscriptionItem | null>(null);
 
-  // Currency Symbol from CURRENCIES engine
   const currencySymbol = CURRENCIES[currency]?.symbol || '$';
 
-  // Fetch real data from API route if MongoDB is connected
+  // Fetch from API if MongoDB is connected
   useEffect(() => {
     async function loadSubscriptions() {
       try {
@@ -116,71 +115,51 @@ export default function DashboardPage() {
         if (json.success && Array.isArray(json.data) && json.data.length > 0) {
           setSubscriptions(json.data);
         }
-      } catch (err) {
+      } catch {
         console.warn('API endpoint unavailable, using in-memory demo state.');
       }
     }
     loadSubscriptions();
   }, []);
 
-  // Calculate Metrics with currency conversion
+  // ── Metrics ───────────────────────────────────────────────────
   let totalMonthlySpend = 0;
-  let activeCount = 0;
-  let trialCount = 0;
-  let upcomingCount = 0;
+  let activeCount       = 0;
+  let trialCount        = 0;
+  let upcomingCount     = 0;
 
-  const now = new Date();
-  const next7Days = new Date();
-  next7Days.setDate(now.getDate() + 7);
+  const now      = new Date();
+  const next7    = new Date();
+  next7.setDate(now.getDate() + 7);
 
   subscriptions.forEach((sub) => {
     if (sub.status === 'cancelled') return;
-
-    // Convert native subscription price into the currently active target currency
-    const convertedPrice = convertCurrency(sub.price, sub.currency || 'USD', currency);
-
-    let monthlyCost = convertedPrice;
-    if (sub.frequency === 'yearly') monthlyCost = convertedPrice / 12;
-    else if (sub.frequency === 'weekly') monthlyCost = convertedPrice * 4.33;
-
+    const converted   = convertCurrency(sub.price, sub.currency || 'USD', currency);
+    let monthlyCost   = converted;
+    if (sub.frequency === 'yearly')      monthlyCost = converted / 12;
+    else if (sub.frequency === 'weekly') monthlyCost = converted * 4.33;
     totalMonthlySpend += monthlyCost;
-
     if (sub.status === 'active') activeCount++;
-    if (sub.status === 'trial') trialCount++;
-
+    if (sub.status === 'trial')  trialCount++;
     if (sub.renewalDate) {
       const renewal = new Date(sub.renewalDate);
-      if (renewal >= now && renewal <= next7Days) {
-        upcomingCount++;
-      }
+      if (renewal >= now && renewal <= next7) upcomingCount++;
     }
   });
 
   const yearlyEstimate = totalMonthlySpend * 12;
 
-  // Handlers
-  const handleOpenAddModal = () => {
-    setEditingSub(null);
-    setIsModalOpen(true);
-  };
-
-  const handleEditSub = (sub: SubscriptionItem) => {
-    setEditingSub(sub);
-    setIsModalOpen(true);
-  };
+  // ── Handlers ──────────────────────────────────────────────────
+  const handleOpenAddModal = () => { setEditingSub(null); setIsModalOpen(true); };
+  const handleEditSub      = (sub: SubscriptionItem) => { setEditingSub(sub); setIsModalOpen(true); };
 
   const handleDeleteSub = async (id: string) => {
     setSubscriptions((prev) => prev.filter((s) => s._id !== id));
-    try {
-      await fetch(`/api/subscriptions/${id}`, { method: 'DELETE' });
-    } catch (e) {
-      console.error('Failed to delete via API', e);
-    }
+    try { await fetch(`/api/subscriptions/${id}`, { method: 'DELETE' }); } catch { /* noop */ }
   };
 
   const handleSaveSub = async (data: Partial<SubscriptionItem>) => {
     if (data._id) {
-      // Update existing
       setSubscriptions((prev) =>
         prev.map((s) => (s._id === data._id ? ({ ...s, ...data } as SubscriptionItem) : s))
       );
@@ -190,35 +169,29 @@ export default function DashboardPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
         });
-      } catch (e) {
-        console.error('Failed to update via API', e);
-      }
+      } catch { /* noop */ }
     } else {
-      // Add new
       const newSub: SubscriptionItem = {
-        _id: 'sub_' + Date.now(),
-        name: data.name || 'Untitled Service',
-        price: data.price || 0,
-        currency: data.currency || currency,
-        frequency: data.frequency || 'monthly',
-        category: data.category || 'Other',
+        _id:           'sub_' + Date.now(),
+        name:          data.name          || 'Untitled Service',
+        price:         data.price         || 0,
+        currency:      data.currency      || currency,
+        frequency:     data.frequency     || 'monthly',
+        category:      data.category      || 'Other',
         paymentMethod: data.paymentMethod || 'Credit Card',
-        status: (data.status as any) || 'active',
-        startDate: data.startDate || new Date().toISOString().split('T')[0],
-        renewalDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        notes: data.notes || '',
+        status:        (data.status as any) || 'active',
+        startDate:     data.startDate     || new Date().toISOString().split('T')[0],
+        renewalDate:   new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        notes:         data.notes         || '',
       };
       setSubscriptions((prev) => [newSub, ...prev]);
-
       try {
         await fetch('/api/subscriptions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
         });
-      } catch (e) {
-        console.error('Failed to save via API', e);
-      }
+      } catch { /* noop */ }
     }
   };
 
@@ -229,18 +202,22 @@ export default function DashboardPage() {
   };
 
   const handleExportReport = () => {
-    const jsonStr = JSON.stringify(subscriptions, null, 2);
-    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(subscriptions, null, 2)], {
+      type: 'application/json',
+    });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
+    const a   = document.createElement('a');
+    a.href     = url;
     a.download = `subpulse-export-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#13131b]">
-      {/* Header Bar */}
+    // paper-texture + ambient-glow are applied via CSS pseudo-elements in globals.css
+    <div className="min-h-screen flex flex-col bg-background paper-texture ambient-glow">
+
+      {/* ── Sticky Header ─────────────────────────────────────── */}
       <Header
         currency={currency}
         onCurrencyChange={setCurrency}
@@ -249,9 +226,9 @@ export default function DashboardPage() {
         onOpenEmailModal={() => setIsEmailModalOpen(true)}
       />
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-8">
-        {/* KPI Metric Summary Cards */}
+      {/* ── Dashboard Body ────────────────────────────────────── */}
+      <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-8 lg:py-10">
+        {/* KPI Cards */}
         <MetricCards
           totalMonthlySpend={totalMonthlySpend}
           yearlyEstimate={yearlyEstimate}
@@ -261,10 +238,14 @@ export default function DashboardPage() {
           currencySymbol={currencySymbol}
         />
 
-        {/* Analytics Breakdown & AI Insights */}
-        <AnalyticsSection subscriptions={subscriptions} currencySymbol={currencySymbol} currency={currency} />
+        {/* Analytics */}
+        <AnalyticsSection
+          subscriptions={subscriptions}
+          currencySymbol={currencySymbol}
+          currency={currency}
+        />
 
-        {/* Active Subscriptions Table */}
+        {/* Subscriptions Table */}
         <SubscriptionTable
           subscriptions={subscriptions}
           currencySymbol={currencySymbol}
@@ -275,17 +256,27 @@ export default function DashboardPage() {
         />
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-[#292932] py-6 px-4 lg:px-8 text-center text-xs text-[#908fa0]">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>
-            <span className="font-semibold text-white">SubPulse</span> — Modern Next.js 14+ Subscription Engine
+      {/* ── Footer ────────────────────────────────────────────── */}
+      <footer className="relative z-10 border-t border-[#E8E4DF] py-5 px-4 lg:px-8">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+          {/* Wordmark */}
+          <div className="flex items-center gap-2">
+            <span className="font-serif italic text-base text-[#1A1A1A] tracking-tight">
+              SubPulse
+            </span>
+            <span className="w-px h-4 bg-[#E8E4DF]" aria-hidden="true" />
+            <span className="text-xs text-[#6B6B6B]">
+              Next.js 14 · Subscription Intelligence Engine
+            </span>
           </div>
-          <div>© {new Date().getFullYear()} SubPulse Inc. All rights reserved.</div>
+          {/* Copyright */}
+          <p className="text-xs text-[#9CA3AF]">
+            © {new Date().getFullYear()} SubPulse Inc. All rights reserved.
+          </p>
         </div>
       </footer>
 
-      {/* Modal for Add / Edit */}
+      {/* ── Modals ────────────────────────────────────────────── */}
       <SubscriptionModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -294,7 +285,6 @@ export default function DashboardPage() {
         currency={currency}
       />
 
-      {/* Modal for Live Email Notifications */}
       <EmailNotificationModal
         isOpen={isEmailModalOpen}
         onClose={() => setIsEmailModalOpen(false)}

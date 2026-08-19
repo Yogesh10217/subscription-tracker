@@ -20,14 +20,17 @@ export const EmailNotificationModal: React.FC<EmailNotificationModalProps> = ({
   const [email, setEmail] = useState('');
   const [selectedSubId, setSelectedSubId] = useState(subscriptions[0]?._id || '');
   const [loading, setLoading] = useState(false);
-  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [statusMessage, setStatusMessage] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
 
   if (!isOpen) return null;
 
   const handleSendEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !email.includes('@')) {
-      setStatusMessage({ type: 'error', text: 'Please enter a valid Gmail address.' });
+      setStatusMessage({ type: 'error', text: 'Please enter a valid email address.' });
       return;
     }
 
@@ -42,123 +45,139 @@ export const EmailNotificationModal: React.FC<EmailNotificationModalProps> = ({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          to: email,
+          to:          email,
           serviceName: sub.name,
-          price: sub.price,
-          currency: sub.currency || 'USD',
-          frequency: sub.frequency || 'monthly',
+          price:       sub.price,
+          currency:    sub.currency || 'USD',
+          frequency:   sub.frequency || 'monthly',
           renewalDate: sub.renewalDate || new Date().toISOString(),
-          daysLeft: 3,
+          daysLeft:    3,
         }),
       });
 
       const json = await res.json();
 
       if (json.success) {
-        setStatusMessage({
-          type: 'success',
-          text: `Gmail alert sent successfully to ${email}!`,
-        });
+        setStatusMessage({ type: 'success', text: `Alert sent successfully to ${email}!` });
       } else {
-        setStatusMessage({
-          type: 'error',
-          text: json.error || 'Failed to deliver email alert.',
-        });
+        setStatusMessage({ type: 'error', text: json.error || 'Failed to deliver email alert.' });
       }
-    } catch (err: any) {
-      setStatusMessage({
-        type: 'error',
-        text: 'Network error or server API route offline.',
-      });
+    } catch {
+      setStatusMessage({ type: 'error', text: 'Network error or server API route offline.' });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
-      <div className="subpulse-card w-full max-w-md p-6 bg-[#1f1f27] border-[#292932] shadow-2xl relative">
-        {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-[#292932] mb-5">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#8083ff]/15 flex items-center justify-center text-[#8083ff]">
-              <Mail className="w-4 h-4" />
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1A1A1A]/40 backdrop-blur-sm"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="w-full max-w-md bg-white rounded-lg border border-[#E8E4DF] shadow-[0_8px_32px_rgba(26,26,26,0.10)]">
+
+        {/* ── Header ─────────────────────────────────────────────── */}
+        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-[#E8E4DF]">
+          <div className="flex items-center gap-3">
+            {/* Gold mail icon */}
+            <div className="w-9 h-9 rounded-lg bg-[rgba(184,134,11,0.09)] flex items-center justify-center flex-shrink-0">
+              <Mail className="w-4.5 h-4.5 text-[#B8860B]" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">Gmail Renewal Alerts</h3>
-              <p className="text-[10px] text-[#908fa0]">Send automated SMTP reminders to your inbox</p>
+              <h3 className="font-serif text-xl text-[#1A1A1A] tracking-tight leading-snug">
+                Email Renewal Alerts
+              </h3>
+              <p className="font-mono text-[10px] tracking-[0.08em] text-[#6B6B6B] mt-0.5">
+                SMTP reminders to your inbox
+              </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg hover:bg-[#292932] text-[#908fa0] hover:text-white transition-colors"
+            className="p-1.5 rounded-md hover:bg-[#F5F3F0] text-[#9CA3AF] hover:text-[#1A1A1A] transition-colors"
+            aria-label="Close modal"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSendEmail} className="space-y-4 text-xs">
-          <div>
-            <label className="block text-[#908fa0] mb-1 font-medium">Your Gmail Address *</label>
+        {/* ── Form ───────────────────────────────────────────────── */}
+        <form onSubmit={handleSendEmail} className="px-6 py-5 space-y-4">
+
+          {/* Email address */}
+          <div className="space-y-1.5">
+            <label className="font-mono text-[10px] font-medium tracking-[0.12em] uppercase text-[#6B6B6B] block">
+              Your Email Address *
+            </label>
             <input
               type="email"
               required
-              placeholder="e.g. user@gmail.com"
+              placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="subpulse-input w-full"
+              className="serif-input"
             />
           </div>
 
-          <div>
-            <label className="block text-[#908fa0] mb-1 font-medium">Select Subscription Alert *</label>
-            <select
-              value={selectedSubId}
-              onChange={(e) => setSelectedSubId(e.target.value)}
-              className="subpulse-input w-full bg-[#1b1b23]"
-            >
-              {subscriptions.map((sub) => (
-                <option key={sub._id} value={sub._id}>
-                  {sub.name} ({sub.currency || 'USD'} {sub.price.toFixed(2)})
-                </option>
-              ))}
-            </select>
+          {/* Subscription selector */}
+          <div className="space-y-1.5">
+            <label className="font-mono text-[10px] font-medium tracking-[0.12em] uppercase text-[#6B6B6B] block">
+              Select Subscription to Alert *
+            </label>
+            <div className="relative">
+              <select
+                value={selectedSubId}
+                onChange={(e) => setSelectedSubId(e.target.value)}
+                className="serif-select appearance-none pr-7"
+              >
+                {subscriptions.map((sub) => (
+                  <option key={sub._id} value={sub._id}>
+                    {sub.name} ({sub.currency || 'USD'} {sub.price.toFixed(2)})
+                  </option>
+                ))}
+              </select>
+              <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-[#6B6B6B]">▼</span>
+            </div>
           </div>
 
-          {/* Status Message */}
+          {/* Status message */}
           {statusMessage && (
             <div
-              className={`p-3 rounded-lg flex items-start gap-2 text-xs ${
+              className={[
+                'flex items-start gap-2.5 text-sm p-3.5 rounded-md border',
                 statusMessage.type === 'success'
-                  ? 'bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30'
-                  : 'bg-[#EF4444]/15 text-[#EF4444] border border-[#EF4444]/30'
-              }`}
+                  ? 'bg-green-50 text-green-800 border-green-200'
+                  : 'bg-red-50 text-red-800 border-red-200',
+              ].join(' ')}
             >
               {statusMessage.type === 'success' ? (
-                <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+                <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5 text-green-600" />
               ) : (
-                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-600" />
               )}
               <span>{statusMessage.text}</span>
             </div>
           )}
 
-          {/* Action Footer */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#292932]">
-            <button type="button" onClick={onClose} className="subpulse-btn-secondary py-2 text-xs">
+          {/* ── Footer ───────────────────────────────────────────── */}
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#E8E4DF] mt-2">
+            <button type="button" onClick={onClose} className="serif-btn-secondary min-h-0 h-10 px-4 text-sm">
               Close
             </button>
-            <button type="submit" disabled={loading} className="subpulse-btn-primary py-2 text-xs">
+            <button
+              type="submit"
+              disabled={loading}
+              className="serif-btn-primary min-h-0 h-10 px-5 text-sm"
+            >
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Sending Gmail...</span>
+                  Sending…
                 </>
               ) : (
                 <>
                   <Send className="w-4 h-4" />
-                  <span>Send Live Gmail Alert</span>
+                  Send Alert
                 </>
               )}
             </button>

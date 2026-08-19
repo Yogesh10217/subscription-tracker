@@ -5,48 +5,68 @@ export default {
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  // Keep dark mode config for future toggle optionality — no dark styles authored
   darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        background: '#13131b',
-        surface: {
-          DEFAULT: '#13131b',
-          bright: '#393841',
-          lowest: '#0d0d15',
-          low: '#1b1b23',
-          card: '#1f1f27',
-          high: '#292932',
-          highest: '#34343d',
+        // ── Serif Canvas ──────────────────────────────────────────
+        background: '#FAFAF8', // warm ivory — primary canvas
+        foreground: '#1A1A1A', // rich black — primary text
+        card:       '#FFFFFF', // pure white — lifts off ivory background
+
+        // ── Surfaces ──────────────────────────────────────────────
+        muted: {
+          DEFAULT:    '#F5F3F0', // secondary surfaces, hover tints
+          foreground: '#6B6B6B', // secondary text, warm gray
         },
-        primary: {
-          DEFAULT: '#8083ff',
-          light: '#c0c1ff',
-          dark: '#494bd6',
+
+        // ── Accent (Burnished Gold) ────────────────────────────────
+        accent: {
+          DEFAULT:    '#B8860B', // primary gold — links, CTAs, highlights
+          secondary:  '#D4A84B', // lighter gold — hover states, gradients
+          foreground: '#FFFFFF', // text on accent backgrounds
+          muted:      'rgba(184,134,11,0.06)', // featured card background tint
         },
-        secondary: {
-          DEFAULT: '#03b5d3',
-          light: '#4cd7f6',
-          dark: '#00424e',
-        },
-        tertiary: {
-          DEFAULT: '#d97721',
-          light: '#ffb783',
-        },
+
+        // ── Borders ────────────────────────────────────────────────
         border: {
-          DEFAULT: '#292932',
-          subtle: '#34343d',
+          DEFAULT: '#E8E4DF', // warm gray — all rules, dividers, card borders
+          hover:   '#D4CFC9', // slightly deeper on hover
         },
+
+        // ── Form ───────────────────────────────────────────────────
+        input: '#E8E4DF',
+        ring:  '#B8860B', // focus rings match accent gold
+
+        // ── Semantic Status (preserved, softened for warmth) ───────
         status: {
-          active: '#10B981',
-          trial: '#F59E0B',
-          expired: '#EF4444',
-          pending: '#6366F1',
+          active:  '#16A34A', // green-700 equivalent
+          trial:   '#D97706', // amber-600
+          expired: '#DC2626', // red-600
+          pending: '#7C3AED', // violet-600
         },
       },
+
       fontFamily: {
-        sans: ['Plus Jakarta Sans', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
+        // Display / headlines — Playfair Display (soul of the design)
+        serif: ['"Playfair Display"', 'Georgia', 'serif'],
+        // Body / UI — Source Sans 3 (clean, legible, complements serif)
+        sans:  ['"Source Sans 3"', 'system-ui', 'sans-serif'],
+        // Labels / small-caps — IBM Plex Mono (editorial tracking)
+        mono:  ['"IBM Plex Mono"', 'monospace'],
+      },
+
+      boxShadow: {
+        'serif-sm':     '0 1px 2px rgba(26,26,26,0.04)',
+        'serif-md':     '0 4px 12px rgba(26,26,26,0.06)',
+        'serif-lg':     '0 8px 24px rgba(26,26,26,0.08)',
+        'serif-accent': '0 4px 16px rgba(184,134,11,0.18)',
+      },
+
+      letterSpacing: {
+        'small-caps': '0.15em',
+        'editorial':  '0.08em',
       },
     },
   },
