@@ -59,10 +59,90 @@ describe('SubscriptionTable Component', () => {
       />
     );
 
-    const searchInput = screen.getByPlaceholderText('Search services...');
+    const searchInput = screen.getByPlaceholderText(/search services/i);
     fireEvent.change(searchInput, { target: { value: 'Netflix' } });
 
     expect(screen.getByText('Netflix Premium')).toBeInTheDocument();
     expect(screen.queryByText('AWS Cloud')).not.toBeInTheDocument();
+  });
+
+  it('filters subscriptions by category', () => {
+    render(
+      <SubscriptionTable
+        subscriptions={mockSubscriptions}
+        currencySymbol="$"
+        currency="USD"
+        onEdit={jest.fn()}
+        onDelete={jest.fn()}
+        onStatusChange={jest.fn()}
+      />
+    );
+
+    const categorySelect = screen.getByDisplayValue('All Categories');
+    fireEvent.change(categorySelect, { target: { value: 'Cloud & Hosting' } });
+
+    expect(screen.queryByText('Netflix Premium')).not.toBeInTheDocument();
+    expect(screen.getByText('AWS Cloud')).toBeInTheDocument();
+  });
+
+  it('filters subscriptions by status', () => {
+    render(
+      <SubscriptionTable
+        subscriptions={mockSubscriptions}
+        currencySymbol="$"
+        currency="USD"
+        onEdit={jest.fn()}
+        onDelete={jest.fn()}
+        onStatusChange={jest.fn()}
+      />
+    );
+
+    const statusSelect = screen.getByDisplayValue('All Statuses');
+    fireEvent.change(statusSelect, { target: { value: 'trial' } });
+
+    expect(screen.queryByText('Netflix Premium')).not.toBeInTheDocument();
+    expect(screen.getByText('AWS Cloud')).toBeInTheDocument();
+  });
+
+  it('shows empty state when no subscriptions match filters', () => {
+    render(
+      <SubscriptionTable
+        subscriptions={mockSubscriptions}
+        currencySymbol="$"
+        currency="USD"
+        onEdit={jest.fn()}
+        onDelete={jest.fn()}
+        onStatusChange={jest.fn()}
+      />
+    );
+
+    const searchInput = screen.getByPlaceholderText(/search services/i);
+    fireEvent.change(searchInput, { target: { value: 'NonExistentService' } });
+
+    expect(screen.getByText(/No subscriptions match your filters/i)).toBeInTheDocument();
+  });
+
+  it('calls onEdit and onDelete handlers when action buttons are clicked', () => {
+    const handleEdit = jest.fn();
+    const handleDelete = jest.fn();
+
+    render(
+      <SubscriptionTable
+        subscriptions={mockSubscriptions}
+        currencySymbol="$"
+        currency="USD"
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onStatusChange={jest.fn()}
+      />
+    );
+
+    const editButtons = screen.getAllByTitle(/edit subscription/i);
+    fireEvent.click(editButtons[0]);
+    expect(handleEdit).toHaveBeenCalledWith(mockSubscriptions[0]);
+
+    const deleteButtons = screen.getAllByTitle(/delete subscription/i);
+    fireEvent.click(deleteButtons[0]);
+    expect(handleDelete).toHaveBeenCalledWith(mockSubscriptions[0]._id);
   });
 });
